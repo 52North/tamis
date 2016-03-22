@@ -168,6 +168,9 @@ niederschlagVec <-as.numeric(sapply(niederschlag,
     return(res)
   }))
 
+if(observedproperty == "Schuettmenge")
+  niederschlagVec[niederschlagVec > 100] <- NA
+
 fuellstand <- vector("list", length(times))
 for(i in 1:length(times)) {
   fuellstand[[i]] <- getObservation(FLUGGS_SOS,
@@ -186,6 +189,9 @@ fuellstandVec <- as.numeric(sapply(fuellstand, function(x) {
   else 
     return(res)
 }))
+
+if(observedproperty == "Schuettmenge")
+  fuellstandVec[fuellstandVec < 291] <- NA
 
 targetVec <- targetObs_STFDF@data[[1]]
 
