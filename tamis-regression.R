@@ -1,8 +1,21 @@
-# wps.des: tamis-regression, title = TaMIS Regression Model for Wasserstand_im_Damm at Bevertalsperre;
+# wps.des: tamis-regression, title = TaMIS Regression Model for observedproperty_im_Damm at Bevertalsperre;
 
 # wps.in: observedproperty, string, observed property, 
 # abstract = the observed property default: Wasserstand_im_Damm,
 # value = Wasserstand_im_Damm;
+
+# wps.in: foi, string, feature of interest, 
+# abstract = the feature of interest default: Bever-Talsperre_MQA7_Piezometer_Kalkzone,
+# value = Bever-Talsperre_MQA7_Piezometer_Kalkzone;
+
+# "Bever-Talsperre_MQA7_Piezometer_Kalkzone",
+# "Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper",
+# "Bever-Talsperre_MQA3_Piezometer_Luftseite",
+# "Bever-Talsperre_MQA4_Piezometer_Luftseite",
+# "Bever-Talsperre_MQA5_Piezometer_Berme"
+
+# "Bever-Talsperre_Sickerwassermessstelle_S2A"
+# "Bever-Talsperre_Sickerwassermessstelle_S2B"
 
 # wps.in: phenomenontime, string, phenomenon time, 
 # abstract = the phenomenon time;
@@ -24,8 +37,6 @@ as.Spatial.MonitoringPoint <- function(obj, ...) {
                          proj4string = .extractCRS(obj)))
 }
 
-# obs <- wasserstand
-# obs <- sickerwasser
 as.STFDF.list.Om_OMObservation <- function (obs) {
   sp <- do.call(rbind, lapply(obs, function(x) as.Spatial.MonitoringPoint(x@featureOfInterest@feature)))
   
@@ -75,73 +86,87 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
 }
 
 ## 
+# updateStatus("Requesting SOS")
 
-mNHNConv <- function(x, sos) {
-  as.double(x)
-}
-
-updateStatus("Requesting SOS")
-
+source("~/52North/secOpts.R")
 TaMIS_SOS <- SOS(url = "http://fluggs.wupperverband.de/sos2-tamis/service",
                  version = "2.0.0", binding = "KVP", curlOptions = .opts)
 
-updateStatus("Requested SOS successfully")
+# updateStatus("Requested SOS successfully")
 
-updateStatus("Requesting Wasserstand observations")
+# updateStatus("Requesting observedproperty observations")
 
-wasserstand <- getObservation(TaMIS_SOS,
-                              offering = "Zeitreihen_Handeingabe", featureOfInterest=SosFeatureOfInterest(list("Bever-Talsperre_MQA7_Piezometer_Kalkzone",
-                                                                          "Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper",
-                                                                          "Bever-Talsperre_MQA3_Piezometer_Luftseite",
-                                                                          "Bever-Talsperre_MQA4_Piezometer_Luftseite",
-                                                                          "Bever-Talsperre_MQA5_Piezometer_Berme")),
-                              observedProperty = list(observedproperty),
-                              eventTime = paste("om:phenomenonTime", phenomenontime, sep=","), 
-                              responseFormat = "http://www.opengis.net/om/2.0",
-                              verbose=TRUE, saveOriginal = TRUE)
+# wps.off
+# observedproperty <- "Wasserstand_im_Damm"
+# foi <- "Bever-Talsperre_MQA7_Piezometer_Kalkzone"
+observedproperty <- "Schuettmenge"
+foi <- "Bever-Talsperre_Sickerwassermessstelle_S2A"
+phenomenontime <- "2016-01-01T00:00/2016-03-10T23:59"
+# wps.on
 
-updateStatus("Requested Wasserstand observations successfully")
+if(observedproperty == "Wasserstand_im_Damm") {
+  offs <- "Zeitreihen_Handeingabe"
+  proc <- "Handeingabe"
+}
+if(observedproperty == "Schuettmenge") {
+  offs <- "Zeitreihen_Tageswert_Prozessleitsystem"
+  proc <- "Tageswert_Prozessleitsystem"
+}
 
-updateStatus("Plotting Wasserstand")
+targetObs <- getObservation(TaMIS_SOS,
+                            offering = offs, 
+                            procedure = proc,
+                            featureOfInterest=SosFeatureOfInterest(list(foi)),
+                            observedProperty = list(observedproperty),
+                            eventTime = paste("om:phenomenonTime", phenomenontime, sep=","), 
+                            responseFormat = "http://www.opengis.net/om/2.0")
 
-wasserstand_STFDF <- as.STFDF.list.Om_OMObservation(wasserstand)
+# updateStatus("Requested observedproperty observations successfully")
 
-wasserstand_plot <- "wasserstand_plot.png"
+# updateStatus("Plotting observedproperty")
 
-png(file = wasserstand_plot)
+targetObs_STFDF <- as.STFDF.list.Om_OMObservation(targetObs)
 
-tmp <- stplot(wasserstand_STFDF, mode="ts")
+targetObs_plot <- "targetObs_plot.png"
+png(file = targetObs_plot)
 
+tmp <- stplot(targetObs_STFDF, mode="ts")
 print(tmp)
 
 graphics.off()
 
-# wps.out: wasserstand_plot, png;
+# wps.out: targetObs_plot, png;
 
-times <- as.character(index(wasserstand_STFDF@time))
+
+if(observedproperty == "Wasserstand_im_Damm") {
+  times <- as.character(index(targetObs_STFDF@time))
+} else {
+  times <- as.character(index(targetObs_STFDF@time))
+  times <- sapply(strsplit(times, " "), function(x) x[1])
+} 
 
 FLUGGS_SOS <- SOS(url = "http://www.fluggs.de/sos2/sos",
-                  version = "2.0.0", binding = "KVP")#, curlOptions = .opts)
+                  version = "2.0.0", binding = "KVP")
 
 niederschlag <- vector("list",length = length(times))
-for ( i in 1:length(times)) { # t <- times[[1]]
+for ( i in 1:length(times)) {
 niederschlag[[i]] <- getObservation(FLUGGS_SOS,
                                    offering = "Zeitreihen_Tagessumme",
                                    featureOfInterest=SosFeatureOfInterest(list("Bever-Talsperre")),
                                    observedProperty = list("Niederschlagshoehe"),
                                    procedure = "Tagessumme",
-                                   eventTime = paste("om:phenomenonTime,", times[i], "T00:00", sep=""), #  "T00:00/",t,"T23:59:59", 
+                                   eventTime = paste("om:phenomenonTime,", times[i], "T00:00", sep=""),
                                    responseFormat = "http://www.opengis.net/om/2.0")
 }
 
-niederschlagVec <-as.numeric(sapply(niederschlag, function(x) x[[1]]@result))
-
-# responseformat=http://www.opengis.net/om/2.0
-# observedProperty=Speicherfuellstand
-# procedure=Einzelwert
-# featureOfInterest=Bever-Talsperre_Windenhaus
-# namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29
-# temporalFilter=om%3AphenomenonTime%2C2016-03-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z
+niederschlagVec <-as.numeric(sapply(niederschlag, 
+                                    function(x) {
+  res <- x[[1]]@result
+  if(is.null(res))
+    return(NA)
+  else 
+    return(res)
+  }))
 
 fuellstand <- vector("list", length(times))
 for(i in 1:length(times)) {
@@ -154,15 +179,20 @@ for(i in 1:length(times)) {
                                responseFormat = "http://www.opengis.net/om/2.0")
 }
 
-fuellstandVec <- as.numeric(sapply(fuellstand, function(x) x[[1]]@result))
+fuellstandVec <- as.numeric(sapply(fuellstand, function(x) {
+  res <- x[[1]]@result
+  if(is.null(res))
+    return(NA)
+  else 
+    return(res)
+}))
 
-wasserstandVec <- wasserstand_STFDF[1,,drop=F]@data$Wasserstand_im_Damm
+targetVec <- targetObs_STFDF@data[[1]]
 
-lmMod <- lm(wasserstandVec ~ niederschlagVec + fuellstandVec)
+lmMod <- lm(targetVec ~ niederschlagVec + fuellstandVec)
 summary(lmMod)
 
 model_diagnostics <- "model_diagnostics.png"
-
 png(file = model_diagnostics)#TODO vielleicht mehr parameter wie groesse etc
 
 par(mfrow=c(2,2))
@@ -173,28 +203,27 @@ graphics.off()
 # wps.out: model_diagnostics, png;
 
 library(lattice)
-p1 <- xyplot(wasserstandVec ~ niederschlagVec,
+p1 <- xyplot(targetVec ~ niederschlagVec,
        xlab="Niederschalg",
-       ylab="Wasserstand")
-p2 <- xyplot(wasserstandVec ~  fuellstandVec,
+       ylab=observedproperty)
+p2 <- xyplot(targetVec ~  fuellstandVec,
        xlab="Fuellstand",
-       ylab="Wasserstand")
+       ylab=observedproperty)
 
-p3 <- xyplot(predict(lmMod, data.frame(niederschlagVec=niederschlagVec, fuellstandVec=fuellstandVec)) ~ wasserstandVec,
-     xlab="model Wasserstand",
-     ylab="gemessener Wasserstand",
+p3 <- xyplot(predict(lmMod, data.frame(niederschlagVec=niederschlagVec, fuellstandVec=fuellstandVec)) ~ targetVec,
+     xlab=paste("model", observedproperty),
+     ylab=paste("gemessener", observedproperty),
      panel = function(x, y) {
        panel.xyplot(x, y)
        panel.abline(lm(x~y, data.frame(x=20:30, y=20:30)))
      })
 
-p4 <- cloud(wasserstandVec ~ niederschlagVec + fuellstandVec,
+p4 <- cloud(targetVec ~ niederschlagVec + fuellstandVec,
             xlab="Niederschlag",
             ylab="Fuellstand",
-            zlab=list("Wasserstand",rot=93))
+            zlab=list(observedproperty, rot=93))
 
 relations <- "relations.png"
-
 png(file = relations)
 
 print(p1, position=c(0,0.5, 0.5,1), more=T)
