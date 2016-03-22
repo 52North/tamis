@@ -97,11 +97,12 @@ TaMIS_SOS <- SOS(url = "http://fluggs.wupperverband.de/sos2-tamis/service",
 # updateStatus("Requesting observedproperty observations")
 
 # wps.off
-# observedproperty <- "Wasserstand_im_Damm"
-# foi <- "Bever-Talsperre_MQA7_Piezometer_Kalkzone"
-observedproperty <- "Schuettmenge"
-foi <- "Bever-Talsperre_Sickerwassermessstelle_S2A"
-phenomenontime <- "2016-01-01T00:00/2016-03-10T23:59"
+observedproperty <- "Wasserstand_im_Damm"
+foi <- "Bever-Talsperre_MQA7_Piezometer_Kalkzone"
+phenomenontime <- "2015-10-01T00:00/2016-03-10T23:59"
+# observedproperty <- "Schuettmenge"
+# foi <- "Bever-Talsperre_Sickerwassermessstelle_S2A"
+# phenomenontime <- "2016-01-01T00:00/2016-03-10T23:59"
 # wps.on
 
 if(observedproperty == "Wasserstand_im_Damm") {
@@ -210,24 +211,33 @@ graphics.off()
 
 library(lattice)
 p1 <- xyplot(targetVec ~ niederschlagVec,
-       xlab="Niederschalg",
+       xlab="Niederschlag",
        ylab=observedproperty)
 p2 <- xyplot(targetVec ~  fuellstandVec,
        xlab="Fuellstand",
        ylab=observedproperty)
 
 p3 <- xyplot(predict(lmMod, data.frame(niederschlagVec=niederschlagVec, fuellstandVec=fuellstandVec)) ~ targetVec,
-     xlab=paste("model", observedproperty),
+     xlab=paste("Model", observedproperty),
      ylab=paste("gemessener", observedproperty),
      panel = function(x, y) {
        panel.xyplot(x, y)
        panel.abline(lm(x~y, data.frame(x=20:30, y=20:30)))
      })
 
-p4 <- cloud(targetVec ~ niederschlagVec + fuellstandVec,
-            xlab="Niederschlag",
-            ylab="Fuellstand",
-            zlab=list(observedproperty, rot=93))
+grid <- data.frame(niederschlagVec = rep(seq(min(niederschlagVec, na.rm = T), max(niederschlagVec, na.rm = T),length.out = 20), each=20))
+grid$fuellstandVec <- rep(seq(min(fuellstandVec, na.rm = T), max(fuellstandVec, na.rm = T),length.out = 20), 20)
+grid$targetVec <- predict(lmMod, grid)
+
+p4 <- wireframe(targetVec ~ niederschlagVec + fuellstandVec, grid,
+                xlab="Niederschlag",
+                ylab="Fuellstand",
+                zlab=list(observedproperty, rot=93),
+                panel =  function(x, y, z, ...) {
+                  panel.wireframe(x, y, z, ...)
+                  panel.cloud(niederschlagVec, fuellstandVec, targetVec, ...)
+                },
+                scales = list(arrows=F))
 
 relations <- "relations.png"
 png(file = relations)
