@@ -1,7 +1,7 @@
-# wps.des: tamis-regression, title = TaMIS Regression Model for observedproperty_im_Damm at Bevertalsperre;
+# wps.des: tamis-regression, title = TaMIS Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
 
 # wps.in: observedproperty, string, observed property, 
-# abstract = the observed property default: Wasserstand_im_Damm,
+# abstract = the observed property. Either Wasserstand_im_Damm or Schuettmenge. Default: Wasserstand_im_Damm,
 # value = Wasserstand_im_Damm;
 
 # wps.in: foi, string, feature of interest, 
@@ -18,7 +18,7 @@
 # "Bever-Talsperre_Sickerwassermessstelle_S2B"
 
 # wps.in: phenomenontime, string, phenomenon time, 
-# abstract = the phenomenon time;
+# abstract = the phenomenon time, value=2015-08-16T00:00/2015-12-31T23:59;
 
 ## tamis
 library(sos4R)
@@ -219,7 +219,7 @@ p2 <- xyplot(targetVec ~  fuellstandVec,
 
 p3 <- xyplot(predict(lmMod, data.frame(niederschlagVec=niederschlagVec, fuellstandVec=fuellstandVec)) ~ targetVec,
      xlab=paste("Model", observedproperty),
-     ylab=paste("gemessener", observedproperty),
+     ylab=paste("gemessen", observedproperty),
      panel = function(x, y) {
        panel.xyplot(x, y)
        panel.abline(lm(x~y, data.frame(x=20:30, y=20:30)))
