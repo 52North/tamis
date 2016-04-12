@@ -3,3 +3,7 @@
 .RData
 .Ruserdata
 tamis.Rproj
+model_diagnostics.png
+model_prediction.csv
+relations.png
+targetObs_plot.png
