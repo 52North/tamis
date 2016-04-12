@@ -213,6 +213,6 @@ if (class(target) == "SpatialPointsDataFrame") {
 #### wps output
 predMap <- "predMap.png"
 png(file = predMap)
-stplot(target_STFDF[,sample(n.time, min(n.time, 9)),"var1.pred"])
+stplot(target_STFDF[,order(sample(n.time, min(n.time, 9))),"var1.pred"])
 graphics.off()
 # wps.out: predMap, png;
