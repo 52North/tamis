@@ -13,12 +13,10 @@
 # value = http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpati-al%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z;
 
 # wps.in: SOSreqNiederschlagPred, string, SOS-request, 
-# abstract = SOS-request for prediction values: Niederschlag,
-# value = NULL;
+# abstract = SOS-request for prediction values: Niederschlag, minOccurs = 0, maxOccurs = 1;
 
 # wps.in: SOSreqFuellstandPred, string, SOS-request, 
-# abstract = SOS-request for prediction values: Fuellstand,
-# value = NULL;
+# abstract = SOS-request for prediction values: Fuellstand, minOccurs = 0, maxOccurs = 1;
 
 ## tamis
 library(sos4R)
@@ -95,9 +93,9 @@ SOSreqFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&req
 
 SOSreqTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpati-al%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z"
 
-SOSreqNiederschlagPred <- "NULL"
+SOSreqNiederschlagPred <- NA
 
-SOSreqFuellstandPred <- "NULL"
+SOSreqFuellstandPred <- NA
 # wps.on
 
 targetBreakUp <- strsplit(SOSreqTarget,split = "?", fixed = T)[[1]]
@@ -182,7 +180,7 @@ parList <- SOSreqBreakup(fuellstandBreakUp)
 parList$sos <- FLUGGS_SOS
 parList$offering <- "Zeitreihen_Einzelwert"
 
-if(SOSreqFuellstandPred == "NULL") {
+if(is.na(SOSreqFuellstandPred)) {
   fuellstandPred <- do.call(getObservation, parList)
 }
 
@@ -203,7 +201,7 @@ fuellstandVec <- as.numeric(sapply(fuellstand, function(x) {
 fuellstandVec[fuellstandVec < 291] <- NA
 
 # check for prediction
-if (!SOSreqFuellstandPred == "NULL") {
+if (!is.na(SOSreqFuellstandPred)) {
   fuellstandBreakUp <- strsplit(SOSreqFuellstandPred,split = "?", fixed = T)[[1]]
   fuellstandURL <- fuellstandBreakUp[1] 
   fuellstandBreakUp <- lapply(strsplit(fuellstandBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
@@ -235,7 +233,7 @@ parList <- SOSreqBreakup(niederschlagBreakUp)
 parList$sos <- FLUGGS_SOS
 parList$offering <- "Zeitreihen_Tagessumme"
 
-if (SOSreqNiederschlagPred == "NULL") {
+if (is.na(SOSreqNiederschlagPred)) {
   niederschlagPred <- do.call(getObservation, parList)
 }
 
@@ -257,7 +255,7 @@ niederschlagVec <-as.numeric(sapply(niederschlag,
 
 niederschlagVec[niederschlagVec > 100] <- NA
 
-if (!SOSreqNiederschlagPred == "NULL") {
+if (!is.na(SOSreqNiederschlagPred)) {
   niederschlagBreakUp <- strsplit(SOSreqNiederschlagPred,split = "?", fixed = T)[[1]]
   niederschlagURL <- niederschlagBreakUp[1] 
   niederschlagBreakUp <- lapply(strsplit(niederschlagBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
