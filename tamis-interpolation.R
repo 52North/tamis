@@ -1,25 +1,22 @@
 # wps.des: tamis.interpolation, title = Interpolation of Wasserstand at Bevertalsperre;
 
+# wps.in: SOSreqData, string, SOS-request, 
+# abstract = SOS-request for data,
+# value = http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-03-10T13:58:07.519Z%2F2016-03-10T13:58:07.519Z;
 
-# wps.in: observedproperty, string, observed property, 
-# abstract = the observed property default: Wasserstand_im_Damm,
-# value = Wasserstand_im_Damm;
+# wps.in: target, WKT-string or location of geotiff, 
+# abstract = SOS-request for Fuellstand,
+# value = http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-03-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z;
 
+#   <ows:Title>Plot of the target observations</ows:Title>
+#   <ows:Identifier>targetObs_plot</ows:Identifier>
+#   <ows:Title>Diagrams with model parameters</ows:Title>
+#   <ows:Identifier>model_diagnostics</ows:Identifier>
+#   <ows:Title>Relations between observed properties</ows:Title>
+#   <ows:Identifier>relations</ows:Identifier>
+#   <ows:Title>Interpolated Values</ows:Title>
+#   <ows:Identifier>interpolated-values</ows:Identifier>                           
 
-
-
-# wps.in: phenomenontime, string, phenomenon time, 
-# abstract = the phenomenon time;
-
-##########
-## Eingabe Punktgeometrien WKT
-##         Gitter: geoTiff
-## Eingabe Daten: valid sos-request
-
-
-## tamis
-library(sos4R)
-library(spacetime)
 
 as.Spatial.MonitoringPoint <- function(obj, ...) {
   
@@ -42,8 +39,8 @@ as.STFDF.list.Om_OMObservation <- function (obs) {
   ids <- lapply(obs, function(x) x@featureOfInterest@feature@id)
   
   if(any(sapply(res, is.null))) {
-    warning("The following ids have been dropped as they did not contain any data:", paste(ids[dropIds], "\n"))
     dropIds <- which(sapply(res, is.null))
+    warning("The following ids have been dropped as they did not contain any data:", paste(ids[dropIds], "\n"))
     res <- res[-dropIds]
     sp <- sp[-dropIds]
     ids <- ids[-dropIds]
@@ -85,73 +82,129 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
 ## 
 # updateStatus("Requesting SOS")
 
-source("~/52North/secOpts.R")
-TaMIS_SOS <- SOS(url = "http://fluggs.wupperverband.de/sos2-tamis/service",
-                 version = "2.0.0", binding = "KVP", curlOptions = .opts)
+## tamis
+library(sos4R)
+library(spacetime)
+library(gstat)
+library(rgdal)
 
-TaMIS_offs <- sosOfferings(TaMIS_SOS)
-lapply(TaMIS_offs, function(x) x@procedure)
-lapply(TaMIS_offs, function(x) x@observableProperty)
-TaMIS_offs[[1]]@
+source("~/52North/secOpts.R")
+
+# wps.off
+SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-02-28T13:00:00.000Z"
+target <- "geotiff.tiff"
+# wps.on
+
+SOSreqBreakup <- function(sosReq) {
+  parList <- NULL
+  parList$observedProperty <- list(sosReq[[match("observedProperty", sapply(sosReq, function(x) x[1]))]][2])
+  parList$proc <- sosReq[[match("procedure", sapply(sosReq, function(x) x[1]))]][2]
+  FOIid <- match("featureOfInterest", sapply(sosReq, function(x) x[1]))
+  if(!is.na(FOIid))
+    parList$featureOfInterest <- sosReq[[match("featureOfInterest", sapply(sosReq, function(x) x[1]))]][2]
+  parList$responseFormat  <- sosReq[[match("responseformat", sapply(sosReq, function(x) x[1]))]][2]
+  parList$eventTime <- sosReq[[match("temporalFilter", sapply(sosReq, function(x) x[1]))]][2]
+  
+  return(parList)
+}
+
+dataBreakUp <- strsplit(SOSreqData,split = "?", fixed = T)[[1]]
+dataURL <- dataBreakUp[1] 
+
+dataBreakUp <- lapply(strsplit(dataBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
+dataVersion <- dataBreakUp[[match("version", sapply(dataBreakUp, function(x) x[1]))]][2]
+
+parList <- SOSreqBreakup(dataBreakUp)
+
+source("~/52North/secOpts.R")
+TaMIS_SOS <- SOS(url = dataURL,
+                 version = dataVersion, binding = "KVP", curlOptions = .opts)
+
+parList$sos <- TaMIS_SOS
+
+if(is.null(parList$offering)) {
+  TaMIS_offs <- sosOfferings(TaMIS_SOS)
+  fstOccur <- min(which(sapply(TaMIS_offs, function(x) any(x@observableProperty == parList$observedProperty[[1]]))))
+  parList$offering <- names(TaMIS_offs)[4]
+}
+
+dataObs <- do.call(getObservation, parList)
+
+# lapply(dataObs, function(x) x@result)
+
 # updateStatus("Requested SOS successfully")
 
 # updateStatus("Requesting observedproperty observations")
 
-# wps.off
-observedproperty <- "Sohlenwasserdruck"
-# foi <- list("Bever-Talsperre_MQA7_Piezometer_Kalkzone",
-#             "Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper",
-#             "Bever-Talsperre_MQA3_Piezometer_Luftseite",
-#             "Bever-Talsperre_MQA4_Piezometer_Luftseite",
-#             "Bever-Talsperre_MQA5_Piezometer_Berme")
-phenomenontime <- "2015-10-01T00:00/2016-03-10T23:59"
-# observedproperty <- "Schuettmenge"
-# foi <- "Bever-Talsperre_Sickerwassermessstelle_S2A"
-# phenomenontime <- "2016-01-01T00:00/2016-03-10T23:59"
-# wps.on
+dataObs_STFDF <- as.STFDF.list.Om_OMObservation(dataObs)
 
-offs <- "Zeitreihen_Tageswert_Prozessleitsystem"
-proc <- "Tageswert_Prozessleitsystem"
+dataPos <- "dataPos.png"
+png(file = dataPos)
+plot(dataObs_STFDF@sp)
 
-targetObs <- getObservation(TaMIS_SOS,
-                            offering = offs, 
-                            procedure = proc,
-                            # featureOfInterest=SosFeatureOfInterest(foi),
-                            observedProperty = list(observedproperty),
-                            eventTime = paste("om:phenomenonTime", phenomenontime, sep=","), 
-                            responseFormat = "http://www.opengis.net/om/2.0")
-str(targetObs)
+graphics.off()
 
-targetObs_STFDF <- as.STFDF.list.Om_OMObservation(targetObs)
-
-plot(targetObs_STFDF@sp)
-hist(targetObs_STFDF[4,,drop=F]@data$Sohlenwasserdruck)
+# wps.out: dataPos, png;
 
 library(gstat)
 
-empVgm <- variogram(Sohlenwasserdruck~1, targetObs_STFDF[,sample(162,30),drop=F], tlags=0, boundaries=c(0.001,1:5*2))
+dataObs_STFDF@data$Schuettmenge
+
+n.time <- length(dataObs_STFDF@time)
+
+empVgm <- variogram(Schuettmenge~1, dataObs_STFDF[,sample(n.time,min(30,n.time)),drop=F],
+                    tlags=0, boundaries=c(1:16*5-2.5))
 empVgm <- empVgm[-1,]
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
 
-plot(empVgm)
+empVgm <- empVgm[empVgm$np>0,]
+fitVgm <- fit.variogram(empVgm, vgm(0.5,"Lin",60))
 
-fitVgm <- fit.variogram(empVgm, vgm(150,"Sph",5), fit.method=6)
-gstat:::plot.gstatVariogram(empVgm, fitVgm)
+#### wps output
+vgmFit <- "vgmFit.png"
+png(file = vgmFit)
+plot(empVgm, fitVgm)
+graphics.off()
+# wps.out: vgmFit, png;
 
 
-fit.variogram(variogram(Sohlenwasserdruck~1, targetObs_STFDF[,sample(162,1)], cutoff=20), #, boundaries=c(0.001,1:5*2)),
-              vgm(150, "Sph", 5))
+# wps.off
+# apply(dataObs_STFDF@sp@bbox, 1, diff) %/% 10
+target <- "geotiff.tiff" #SpatialGrid(GridTopology(c(2595855,5668255), c(10,10), c(24, 12)), dataObs_STFDF@sp@proj4string)
+# wps.on
 
-plot(variogram(Sohlenwasserdruck~1, targetObs_STFDF[,sample(162,1)], cutoff=20))
+if (tail(strsplit(target,split =  ".", fixed = T)[[1]],1) == "tiff") {
+  target <- readGDAL(target)
+} else {
+  library(rgeos)
+  target <- readWKT(target)
+}
 
-plot(v, m)
+target@proj4string
+dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 
-demo(krige)
+targetData <- NULL
+targetVar <- NULL
+for (day in 1:length(dataObs_STFDF@time)) {
+  pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
+  targetData <- cbind(targetData, pred$var1.pred)
+  targetVar <- cbind(targetVar, pred$var1.var)
+}
 
-v
-empVgm
+target_STFDF <- STFDF(as(target,"SpatialPixels"), dataObs_STFDF@time, 
+                      data.frame(var1.pred=as.numeric((targetData)),
+                                 var1.var =as.numeric((targetVar))))
 
-length(targetObs_STFDF[1,,drop=F]@data$Sohlenwasserdruck)
+writeGDAL(target_STFDF[,1,"var1.pred"], "geotiff.tiff", drivername="GTiff")#, type="Byte", options=NULL)
 
-targetObs_STFDF@time
+#   <ows:Title>Plot of the target observations</ows:Title>
+#   <ows:Identifier>targetObs_plot</ows:Identifier>
+
+
+#### wps output
+predMap <- "predMap.png"
+png(file = predMap)
+stplot(target_STFDF[,sample(n.time, min(n.time, 9)),"var1.pred"])
+graphics.off()
+# wps.out: predMap, png;
