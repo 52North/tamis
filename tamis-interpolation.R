@@ -92,7 +92,6 @@ source("~/52North/secOpts.R")
 
 # wps.off
 SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-02-28T13:00:00.000Z"
-target <- "geotiff.tiff"
 # wps.on
 
 SOSreqBreakup <- function(sosReq) {
@@ -164,22 +163,24 @@ fitVgm <- fit.variogram(empVgm, vgm(0.5,"Lin",60))
 #### wps output
 vgmFit <- "vgmFit.png"
 png(file = vgmFit)
-tmpVgmFit <- plot(empVgm, fitVgm)
-print(tmpVgmFit)
+tmpPlot <- plot(empVgm, fitVgm)
+print(tmpPlot)
 graphics.off()
 # wps.out: vgmFit, png;
 
 
+# SpatialGrid(GridTopology(c(2595855,5668255), c(10,10), c(24, 12)), dataObs_STFDF@sp@proj4string)
+target <- "geotiff.tiff"
+isGrid <- FALSE
 if (tail(strsplit(target,split =  ".", fixed = T)[[1]],1) == "tiff") {
+  isGrid <-TRUE
   target <- readGDAL(target)
-  target <- target[target@data > 0,]
-  target <- as(target,"SpatialPixels")
+  target <- as(target,"SpatialPointsDataFrame")
 } else {
   library(rgeos)
   target <- readWKT(target)
 }
 
-target@proj4string
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 
 targetData <- NULL
@@ -194,10 +195,15 @@ target_STFDF <- STFDF(target, dataObs_STFDF@time,
                       data.frame(var1.pred=as.numeric((targetData)),
                                  var1.var =as.numeric((targetVar))))
 
-if (class(target) == "SpatialPointsDataFrame") {
-  write.csv(as.data.frame(target_STFDF), file = "predictions.csv")
+predictions <- "predictions"
+
+if (isGrid) {
+  gridded(target_STFDF@sp) <- TRUE
+  writeGDAL(target_STFDF[,1], paste(predictions,"tiff",sep="."),
+            drivername="GTiff")#, type="Byte", options=NULL)
 } else {
-  writeGDAL(target_STFDF[,1,"var1.pred"], "geotiff.tiff", drivername="GTiff")#, type="Byte", options=NULL)
+  write.csv(as.data.frame(target_STFDF), 
+            file = paste("predictions","csv",sep="."))
 }
 
 # wps.out: predictions, type = geotiff;
@@ -205,11 +211,10 @@ if (class(target) == "SpatialPointsDataFrame") {
 #   <ows:Title>Plot of the target observations</ows:Title>
 #   <ows:Identifier>targetObs_plot</ows:Identifier>
 
-
 #### wps output
 predMap <- "predMap.png"
 png(file = predMap)
-tmpPredMap <- stplot(target_STFDF[,order(sample(n.time, min(n.time, 9))),"var1.pred"])
-print(tmpPredMap)
+tmpPlot <- stplot(target_STFDF[,order(sample(n.time, min(n.time, 9))),"var1.pred"])
+print(tmpPlot)
 graphics.off()
 # wps.out: predMap, png;
