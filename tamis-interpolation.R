@@ -97,7 +97,7 @@ library(rgdal)
 source("~/52North/secOpts.R")
 
 
-SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-02-28T13:00:00.000Z"
+SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z"
 
 # updateStatus(print(SOSreqData))
 
@@ -128,6 +128,13 @@ TaMIS_SOS <- SOS(url = dataURL,
 
 parList$sos <- TaMIS_SOS
 
+# add temporal buffer +/- 12 hours
+parList$eventTime <- paste("om%3AphenomenonTime%2C",
+                           paste(as.character(as.POSIXct(strsplit(parList$eventTime, "%2C")[[1]][2], 
+                                                         format="%Y-%m-%dT%H:%M:%S") + c(-24*3600-5,24*3600+5),
+                                              format="%Y-%m-%dT%H:%M:%S"), collapse = "%2F"),
+                           sep="")
+
 if(is.null(parList$offering)) {
   TaMIS_offs <- sosOfferings(TaMIS_SOS)
   fstOccur <- min(which(sapply(TaMIS_offs, function(x) any(x@observableProperty == parList$observedProperty[[1]]))))
@@ -155,8 +162,6 @@ graphics.off()
 
 library(gstat)
 
-dataObs_STFDF@data$Schuettmenge
-
 n.time <- length(dataObs_STFDF@time)
 
 empVgm <- variogram(Schuettmenge~1, dataObs_STFDF[,sample(n.time,min(30,n.time)),drop=F],
@@ -166,7 +171,7 @@ empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nr
 class(empVgm) <- c("gstatVariogram","data.frame")
 
 empVgm <- empVgm[empVgm$np>0,]
-fitVgm <- fit.variogram(empVgm, vgm(0.5,"Lin",60))
+fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma),"Lin",60))
 
 #### wps output
 vgmFit <- "vgmFit.png"
@@ -177,6 +182,8 @@ graphics.off()
 # wps.out: vgmFit, png;
 
 # updateStatus("Fitted variogram")
+
+target <- "geotiff.tiff"
 
 isGrid <- FALSE
 fileType <- tail(strsplit(target,split =  ".", fixed = T)[[1]],1)
@@ -194,7 +201,7 @@ dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 targetData <- NULL
 targetVar <- NULL
 for (day in 1:length(dataObs_STFDF@time)) {
-  pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
+  pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
   targetData <- cbind(targetData, pred$var1.pred)
   targetVar <- cbind(targetVar, pred$var1.var)
 }
