@@ -4,7 +4,7 @@
 # abstract = SOS-request for data,
 # value = http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-03-10T13:58:07.519Z%2F2016-03-10T13:58:07.519Z;
 
-# wps.in: target, WKT-string or location of geotiff, 
+# wps.in: target, type = geotiff, 
 # abstract = SOS-request for Fuellstand,
 # value = http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-03-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z;
 
@@ -140,8 +140,8 @@ dataObs_STFDF <- as.STFDF.list.Om_OMObservation(dataObs)
 
 dataPos <- "dataPos.png"
 png(file = dataPos)
-plot(dataObs_STFDF@sp)
-
+tmpDataPos <- plot(dataObs_STFDF@sp)
+print(tmpDataPos)
 graphics.off()
 
 # wps.out: dataPos, png;
@@ -164,15 +164,11 @@ fitVgm <- fit.variogram(empVgm, vgm(0.5,"Lin",60))
 #### wps output
 vgmFit <- "vgmFit.png"
 png(file = vgmFit)
-plot(empVgm, fitVgm)
+tmpVgmFit <- plot(empVgm, fitVgm)
+print(tmpVgmFit)
 graphics.off()
 # wps.out: vgmFit, png;
 
-
-# wps.off
-# apply(dataObs_STFDF@sp@bbox, 1, diff) %/% 10
-target <- "geotiff.tiff" #SpatialGrid(GridTopology(c(2595855,5668255), c(10,10), c(24, 12)), dataObs_STFDF@sp@proj4string)
-# wps.on
 
 if (tail(strsplit(target,split =  ".", fixed = T)[[1]],1) == "tiff") {
   target <- readGDAL(target)
@@ -204,7 +200,7 @@ if (class(target) == "SpatialPointsDataFrame") {
   writeGDAL(target_STFDF[,1,"var1.pred"], "geotiff.tiff", drivername="GTiff")#, type="Byte", options=NULL)
 }
 
-# wps.out: predictions, application/tiff
+# wps.out: predictions, type = geotiff;
 
 #   <ows:Title>Plot of the target observations</ows:Title>
 #   <ows:Identifier>targetObs_plot</ows:Identifier>
@@ -213,6 +209,7 @@ if (class(target) == "SpatialPointsDataFrame") {
 #### wps output
 predMap <- "predMap.png"
 png(file = predMap)
-stplot(target_STFDF[,order(sample(n.time, min(n.time, 9))),"var1.pred"])
+tmpPredMap <- stplot(target_STFDF[,order(sample(n.time, min(n.time, 9))),"var1.pred"])
+print(tmpPredMap)
 graphics.off()
 # wps.out: predMap, png;
