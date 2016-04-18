@@ -79,8 +79,14 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
   return(sp)
 }
 
+
+
 ## 
 # updateStatus("Requesting SOS")
+
+
+
+# updateStatus(print(class(target)))
 
 ## tamis
 library(sos4R)
@@ -90,9 +96,10 @@ library(rgdal)
 
 source("~/52North/secOpts.R")
 
-# wps.off
+
 SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-02-28T13:00:00.000Z"
-# wps.on
+
+# updateStatus(print(SOSreqData))
 
 SOSreqBreakup <- function(sosReq) {
   parList <- NULL
@@ -127,13 +134,14 @@ if(is.null(parList$offering)) {
   parList$offering <- names(TaMIS_offs)[4]
 }
 
-dataObs <- do.call(getObservation, parList)
 
 # lapply(dataObs, function(x) x@result)
 
 # updateStatus("Requested SOS successfully")
 
-# updateStatus("Requesting observedproperty observations")
+dataObs <- do.call(getObservation, parList)
+
+# updateStatus("Requested observedproperty observations successfully")
 
 dataObs_STFDF <- as.STFDF.list.Om_OMObservation(dataObs)
 
@@ -168,11 +176,11 @@ print(tmpPlot)
 graphics.off()
 # wps.out: vgmFit, png;
 
+# updateStatus("Fitted variogram")
 
-# SpatialGrid(GridTopology(c(2595855,5668255), c(10,10), c(24, 12)), dataObs_STFDF@sp@proj4string)
-target <- "geotiff.tiff"
 isGrid <- FALSE
-if (tail(strsplit(target,split =  ".", fixed = T)[[1]],1) == "tiff") {
+fileType <- tail(strsplit(target,split =  ".", fixed = T)[[1]],1)
+if (fileType == "tiff" | fileType == "tif") {
   isGrid <-TRUE
   target <- readGDAL(target)
   target <- as(target,"SpatialPointsDataFrame")
@@ -195,15 +203,20 @@ target_STFDF <- STFDF(target, dataObs_STFDF@time,
                       data.frame(var1.pred=as.numeric((targetData)),
                                  var1.var =as.numeric((targetVar))))
 
-predictions <- "predictions"
+# updateStatus("Interpolated grid")
+
+if(isGrid) {
+  predictions <- "predictions.tiff"
+} else { 
+  predictions <- "predictions.csv"
+}
 
 if (isGrid) {
   gridded(target_STFDF@sp) <- TRUE
-  writeGDAL(target_STFDF[,1], paste(predictions,"tiff",sep="."),
+  writeGDAL(target_STFDF[,1], predictions,
             drivername="GTiff")#, type="Byte", options=NULL)
 } else {
-  write.csv(as.data.frame(target_STFDF), 
-            file = paste("predictions","csv",sep="."))
+  write.csv(as.data.frame(target_STFDF), predictions)
 }
 
 # wps.out: predictions, type = geotiff;
