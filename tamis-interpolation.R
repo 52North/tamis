@@ -89,12 +89,12 @@ library(rgdal)
 
 source("~/52North/secOpts.R")
 
-# wps.off()
+# wps.off;
 # 2016-02
 SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T10:00:00.00Z%2F2016-02-28T10:00:00.00Z"
 # 2016-01-01
 # SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T23:59:00.00Z"
-# wps.on()
+# wps.on;
 
 # updateStatus(print(SOSreqData))
 
@@ -183,9 +183,9 @@ graphics.off()
 
 # # updateStatus("Fitted variogram")
 
-# wps.off()
+# wps.off;
 target <- "geotiff.tiff"
-# wps.on()
+# wps.on;
 
 isGrid <- FALSE
 

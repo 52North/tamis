@@ -86,7 +86,7 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
 ## 
 # updateStatus("Requesting SOS")
 
-# wps.off
+# wps.off;
 SOSreqNiederschlag <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T13:58:07.519Z%2F2016-03-10T13:58:07.519Z"
 
 SOSreqFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z"
@@ -96,7 +96,7 @@ SOSreqTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&v
 SOSreqNiederschlagPred <- NA
 
 SOSreqFuellstandPred <- NA
-# wps.on
+# wps.on;
 
 targetBreakUp <- strsplit(SOSreqTarget,split = "?", fixed = T)[[1]]
 targetURL <- targetBreakUp[1] 
