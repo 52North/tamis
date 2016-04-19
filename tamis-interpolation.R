@@ -5,8 +5,8 @@
 # value = http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-03-10T13:58:07.519Z%2F2016-03-10T13:58:07.519Z;
 
 # wps.in: target, type = geotiff, 
-# abstract = SOS-request for Fuellstand,
-# value = http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-03-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z;
+# abstract = geotiff defining the interpolation grid (only non NAs will be interpolated),
+# value = geotiff.tiff;
 
 #   <ows:Title>Plot of the target observations</ows:Title>
 #   <ows:Identifier>targetObs_plot</ows:Identifier>
@@ -79,14 +79,7 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
   return(sp)
 }
 
-
-
-## 
 # updateStatus("Requesting SOS")
-
-
-
-# updateStatus(print(class(target)))
 
 ## tamis
 library(sos4R)
@@ -96,8 +89,12 @@ library(rgdal)
 
 source("~/52North/secOpts.R")
 
-
-SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-02-28T13:00:00.000Z"
+# wps.off()
+# 2016-02
+SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T10:00:00.00Z%2F2016-02-28T10:00:00.00Z"
+# 2016-01-01
+# SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T23:59:00.00Z"
+# wps.on()
 
 # updateStatus(print(SOSreqData))
 
@@ -128,14 +125,20 @@ TaMIS_SOS <- SOS(url = dataURL,
 
 parList$sos <- TaMIS_SOS
 
+if (length(strsplit(parList$eventTime, split = "%2F")[[1]]) == 1) {
+# add temporal buffer +/- 1 day and 5 minutes
+  parList$eventTime <- paste("om%3AphenomenonTime%2C",
+                             paste(as.character(as.POSIXct(strsplit(parList$eventTime, "%2C")[[1]][2], 
+                                                           format="%Y-%m-%dT%H:%M:%S") + c(-24*3600-300,24*3600+300),
+                                                format="%Y-%m-%dT%H:%M:%S"), collapse = "%2F"),
+                             sep="")
+}
+
 if(is.null(parList$offering)) {
   TaMIS_offs <- sosOfferings(TaMIS_SOS)
   fstOccur <- min(which(sapply(TaMIS_offs, function(x) any(x@observableProperty == parList$observedProperty[[1]]))))
   parList$offering <- names(TaMIS_offs)[4]
 }
-
-
-# lapply(dataObs, function(x) x@result)
 
 # updateStatus("Requested SOS successfully")
 
@@ -155,31 +158,39 @@ graphics.off()
 
 library(gstat)
 
-dataObs_STFDF@data$Schuettmenge
-
 n.time <- length(dataObs_STFDF@time)
 
-empVgm <- variogram(Schuettmenge~1, dataObs_STFDF[,sample(n.time,min(30,n.time)),drop=F],
-                    tlags=0, boundaries=c(1:16*5-2.5))
+empVgm <- variogram(Schuettmenge ~ 1, dataObs_STFDF, tlags=0)
 empVgm <- empVgm[-1,]
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
 
 empVgm <- empVgm[empVgm$np>0,]
-fitVgm <- fit.variogram(empVgm, vgm(0.5,"Lin",60))
 
-#### wps output
+if(n.time >= 20) {
+  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma),"Lin",60))
+  tmpPlot <- plot(empVgm, fitVgm)
+} else {
+  tmpPlot <- plot(empVgm)
+}
+  
+# wps output
 vgmFit <- "vgmFit.png"
 png(file = vgmFit)
-tmpPlot <- plot(empVgm, fitVgm)
 print(tmpPlot)
 graphics.off()
 # wps.out: vgmFit, png;
 
-# updateStatus("Fitted variogram")
+# # updateStatus("Fitted variogram")
+
+# wps.off()
+target <- "geotiff.tiff"
+# wps.on()
 
 isGrid <- FALSE
+
 fileType <- tail(strsplit(target,split =  ".", fixed = T)[[1]],1)
+
 if (fileType == "tiff" | fileType == "tif") {
   isGrid <-TRUE
   target <- readGDAL(target)
@@ -190,18 +201,26 @@ if (fileType == "tiff" | fileType == "tif") {
 }
 
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
+colnames(dataObs_STFDF@sp@coords) <- c("x","y")
 
 targetData <- NULL
 targetVar <- NULL
-for (day in 1:length(dataObs_STFDF@time)) {
-  pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
-  targetData <- cbind(targetData, pred$var1.pred)
-  targetVar <- cbind(targetVar, pred$var1.var)
+
+if (n.time >= 28) {
+  for (day in 1:n.time) {
+    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
+    targetData <- cbind(targetData, pred$var1.pred)
+    targetVar <- cbind(targetVar, pred$var1.var)
+  }
+} else {
+  for (day in 1:n.time) {
+    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
+    targetData <- cbind(targetData, pred$var1.pred)
+    targetVar <- cbind(targetVar, pred$var1.var)
+  }
 }
 
-target_STFDF <- STFDF(target, dataObs_STFDF@time, 
-                      data.frame(var1.pred=as.numeric((targetData)),
-                                 var1.var =as.numeric((targetVar))))
+target <- addAttrToGeom(geometry(target), data.frame(var1.pred=apply(targetData,1,mean, na.rm=T)))
 
 # updateStatus("Interpolated grid")
 
@@ -212,22 +231,19 @@ if(isGrid) {
 }
 
 if (isGrid) {
-  gridded(target_STFDF@sp) <- TRUE
-  writeGDAL(target_STFDF[,1], predictions,
-            drivername="GTiff")#, type="Byte", options=NULL)
+  gridded(target) <- TRUE
+  writeGDAL(target, predictions, drivername="GTiff")
 } else {
-  write.csv(as.data.frame(target_STFDF), predictions)
+  write.csv(as.data.frame(target), predictions)
 }
 
 # wps.out: predictions, type = geotiff;
 
-#   <ows:Title>Plot of the target observations</ows:Title>
-#   <ows:Identifier>targetObs_plot</ows:Identifier>
-
-#### wps output
+# wps output
 predMap <- "predMap.png"
 png(file = predMap)
-tmpPlot <- stplot(target_STFDF[,order(sample(n.time, min(n.time, 9))),"var1.pred"])
+tmpPlot <- spplot(target,"var1.pred",
+                  sp.layout=list("sp.points",dataObs_STFDF@sp))
 print(tmpPlot)
 graphics.off()
 # wps.out: predMap, png;
