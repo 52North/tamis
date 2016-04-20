@@ -1,8 +1,8 @@
 # wps.des: tamis.interpolation, title = Interpolation of Wasserstand at Bevertalsperre;
 
-# wps.in: SOSreqData, string, SOS-request, 
+# wps.in: SOSregData, string, SOS-request, 
 # abstract = SOS-request for data,
-# value = http://www.fluggs.de/sos2/sos?service%3DSOS&version%3D2.0.0&request%3DGetObservation&responseformat%3Dhttp://www.opengis.net/om/2.0&observedProperty%3DNiederschlagshoehe&procedure%3DTagessumme&featureOfInterest%3DBever-Talsperre&&namespaces%3Dxmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter%3Dom%3AphenomenonTime%2C2015-03-10T13:58:07.519Z%2F2016-03-10T13:58:07.519Z;
+# value = http://fluggs.wupperverband.de/sos2-tamis/service?service%3DSOS&version%3D2.0.0&request%3DGetObservation&responseformat%3Dhttp://www.opengis.net/om/2.0&observedProperty%3DSchuettmenge&procedure%3DTageswert_Prozessleitsystem&namespaces%3Dxmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter%3Dom%3AphenomenonTime%2C2016-02-01T10:00:00.00Z%2F2016-02-28T10:00:00.00Z;
 
 # wps.in: target, type = geotiff, 
 # abstract = geotiff defining the interpolation grid (only non NAs will be interpolated);
@@ -90,12 +90,10 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 # 2016-02
-SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T10:00:00.00Z%2F2016-02-28T10:00:00.00Z"
+SOSregData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T10:00:00.00Z%2F2016-02-28T10:00:00.00Z"
 # 2016-01-01
-# SOSreqData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T23:59:00.00Z"
+# SOSregData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T23:59:00.00Z"
 # wps.on;
-
-# updateStatus(print(SOSreqData))
 
 SOSreqBreakup <- function(sosReq) {
   parList <- NULL
@@ -109,8 +107,12 @@ SOSreqBreakup <- function(sosReq) {
   
   return(parList)
 }
+SOSregData <- gsub("%3D","=", SOSregData)#=-signs must always be escaped using WPS4R 
+SOSregData <- gsub("&amp;","&", SOSregData)#ampersands might be encoded
+SOSregData <- gsub("req_quest","request", SOSregData)#request will be replaced by req_est after sent to Rserve
+SOSregData <- gsub("s_system","system", SOSregData)#request will be replaced by req_est after sent to Rserve TODO: check other filtered strings
 
-dataBreakUp <- strsplit(SOSreqData,split = "?", fixed = T)[[1]]
+dataBreakUp <- strsplit(SOSregData,split = "?", fixed = T)[[1]]
 dataURL <- dataBreakUp[1] 
 
 dataBreakUp <- lapply(strsplit(dataBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])

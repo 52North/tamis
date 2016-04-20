@@ -1,21 +1,21 @@
 # wps.des: tamis-regression, title = TaMIS Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
 
-# wps.in: SOSreqNiederschlag, string, SOS-request, 
+# wps.in: SOSregNiederschlag, string, SOS-request, 
 # abstract = SOS-request for Niederschlag,
 # value = http://www.fluggs.de/sos2/sos?service%3DSOS&version%3D2.0.0&request%3DGetObservation&responseformat%3Dhttp://www.opengis.net/om/2.0&observedProperty%3DNiederschlagshoehe&procedure%3DTagessumme&featureOfInterest%3DBever-Talsperre&&namespaces%3Dxmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter%3Dom%3AphenomenonTime%2C2015-03-10T13:58:07.519Z%2F2016-03-10T13:58:07.519Z;
 
-# wps.in: SOSreqFuellstand, string, SOS-request, 
+# wps.in: SOSregFuellstand, string, SOS-request, 
 # abstract = SOS-request for Fuellstand,
 # value = http://www.fluggs.de/sos2/sos?service%3DSOS&version%3D2.0.0&request%3DGetObservation&responseformat%3Dhttp://www.opengis.net/om/2.0&observedProperty%3DSpeicherfuellstand&procedure%3DEinzelwert&featureOfInterest%3DBever-Talsperre_Windenhaus&namespaces%3Dxmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter%3Dom%3AphenomenonTime%2C2016-03-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z;
 
-# wps.in: SOSreqTarget, string, SOS-request, 
+# wps.in: SOSregTarget, string, SOS-request, 
 # abstract = SOS-request for the target variable,
 # value = http://fluggs.wupperverband.de/sos2-tamis/service?service%3DSOS&version%3D2.0.0&request%3DGetObservation&responseformat%3Dhttp://www.opengis.net/om/2.0&observedProperty%3DWasserstand_im_Damm&procedure%3DHandeingabe&featureOfInterest%3DBever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper&namespaces%3Dxmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpati-al%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter%3Dom%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z;
 
-# wps.in: SOSreqNiederschlagPred, string, SOS-request, 
+# wps.in: SOSregNiederschlagPred, string, SOS-request, 
 # abstract = SOS-request for prediction values: Niederschlag, minOccurs = 0, maxOccurs = 1;
 
-# wps.in: SOSreqFuellstandPred, string, SOS-request, 
+# wps.in: SOSregFuellstandPred, string, SOS-request, 
 # abstract = SOS-request for prediction values: Fuellstand, minOccurs = 0, maxOccurs = 1;
 
 ## tamis
@@ -87,18 +87,22 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
 # updateStatus("Requesting SOS")
 
 # wps.off;
-SOSreqNiederschlag <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T13:58:07.519Z%2F2016-03-10T13:58:07.519Z"
+SOSregNiederschlag <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T13:58:07.519Z%2F2016-03-10T13:58:07.519Z"
 
-SOSreqFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z"
+SOSregFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z"
 
-SOSreqTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpati-al%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z"
+SOSregTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpati-al%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-10-01T10:00:00.00Z%2F2016-03-10T13:00:00.000Z"
 
-SOSreqNiederschlagPred <- NA
+SOSregNiederschlagPred <- NA
 
-SOSreqFuellstandPred <- NA
+SOSregFuellstandPred <- NA
 # wps.on;
+SOSregTarget <- gsub("%3D","=", SOSregTarget)
+SOSregTarget <- gsub("&amp;","&", SOSregTarget)
+SOSregTarget <- gsub("req_quest","request", SOSregTarget)#request will be replaced by req_est after sent to Rserve
+SOSregTarget <- gsub("s_system","system", SOSregTarget)#request will be replaced by req_est after sent to Rserve TODO: check other filtered strings
 
-targetBreakUp <- strsplit(SOSreqTarget,split = "?", fixed = T)[[1]]
+targetBreakUp <- strsplit(SOSregTarget,split = "?", fixed = T)[[1]]
 targetURL <- targetBreakUp[1] 
 
 targetBreakUp <- lapply(strsplit(targetBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
@@ -163,8 +167,12 @@ if(parList$observedProperty == "Wasserstand_im_Damm") {
 } 
 
 ## Fuellstand
+SOSregFuellstand <- gsub("%3D","=", SOSregFuellstand)
+SOSregFuellstand <- gsub("&amp;","&", SOSregFuellstand)
+SOSregFuellstand <- gsub("req_quest","request", SOSregFuellstand)#request will be replaced by req_est after sent to Rserve
+SOSregFuellstand <- gsub("s_system","system", SOSregFuellstand)#request will be replaced by req_est after sent to Rserve TODO: check other filtered strings
 
-fuellstandBreakUp <- strsplit(SOSreqFuellstand,split = "?", fixed = T)[[1]]
+fuellstandBreakUp <- strsplit(SOSregFuellstand,split = "?", fixed = T)[[1]]
 
 fuellstandURL <- fuellstandBreakUp[1] 
 
@@ -180,7 +188,7 @@ parList <- SOSreqBreakup(fuellstandBreakUp)
 parList$sos <- FLUGGS_SOS
 parList$offering <- "Zeitreihen_Einzelwert"
 
-if(is.na(SOSreqFuellstandPred)) {
+if(is.na(SOSregFuellstandPred)) {
   fuellstandPred <- do.call(getObservation, parList)
 }
 
@@ -201,8 +209,12 @@ fuellstandVec <- as.numeric(sapply(fuellstand, function(x) {
 fuellstandVec[fuellstandVec < 291] <- NA
 
 # check for prediction
-if (!is.na(SOSreqFuellstandPred)) {
-  fuellstandBreakUp <- strsplit(SOSreqFuellstandPred,split = "?", fixed = T)[[1]]
+if (!is.na(SOSregFuellstandPred)) {
+  SOSregFuellstandPred <- gsub("%3D","=", SOSregFuellstandPred)
+  SOSregFuellstandPred <- gsub("&amp;","&", SOSregFuellstandPred)
+  SOSregFuellstandPred <- gsub("req_quest","request", SOSregFuellstandPred)#request will be replaced by req_est after sent to Rserve
+  SOSregFuellstandPred <- gsub("s_system","system", SOSregFuellstandPred)#request will be replaced by req_est after sent to Rserve TODO: check other filtered strings
+  fuellstandBreakUp <- strsplit(SOSregFuellstandPred,split = "?", fixed = T)[[1]]
   fuellstandURL <- fuellstandBreakUp[1] 
   fuellstandBreakUp <- lapply(strsplit(fuellstandBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
   fuellstandVersion <- fuellstandBreakUp[[match("version", sapply(fuellstandBreakUp, function(x) x[1]))]][2]
@@ -217,7 +229,12 @@ if (!is.na(SOSreqFuellstandPred)) {
 } 
 
 ### Niederschlag
-niederschlagBreakUp <- strsplit(SOSreqNiederschlag,split = "?", fixed = T)[[1]]
+SOSregNiederschlag <- gsub("%3D","=", SOSregNiederschlag)
+SOSregNiederschlag <- gsub("&amp;","&", SOSregNiederschlag)
+SOSregNiederschlag <- gsub("req_quest","request", SOSregNiederschlag)#request will be replaced by req_est after sent to Rserve
+SOSregNiederschlag <- gsub("s_system","system", SOSregNiederschlag)#request will be replaced by req_est after sent to Rserve TODO: check other filtered strings
+
+niederschlagBreakUp <- strsplit(SOSregNiederschlag,split = "?", fixed = T)[[1]]
 
 niederschlagURL <- niederschlagBreakUp[1] 
 
@@ -233,7 +250,7 @@ parList <- SOSreqBreakup(niederschlagBreakUp)
 parList$sos <- FLUGGS_SOS
 parList$offering <- "Zeitreihen_Tagessumme"
 
-if (is.na(SOSreqNiederschlagPred)) {
+if (is.na(SOSregNiederschlagPred)) {
   niederschlagPred <- do.call(getObservation, parList)
 }
 
@@ -255,8 +272,12 @@ niederschlagVec <-as.numeric(sapply(niederschlag,
 
 niederschlagVec[niederschlagVec > 100] <- NA
 
-if (!is.na(SOSreqNiederschlagPred)) {
-  niederschlagBreakUp <- strsplit(SOSreqNiederschlagPred,split = "?", fixed = T)[[1]]
+if (!is.na(SOSregNiederschlagPred)) {
+  SOSregNiederschlagPred <- gsub("%3D","=", SOSregNiederschlagPred)
+  SOSregNiederschlagPred <- gsub("&amp;","&", SOSregNiederschlagPred)
+  SOSregNiederschlagPred <- gsub("req_quest","request", SOSregNiederschlagPred)#request will be replaced by req_est after sent to Rserve
+  SOSregNiederschlagPred <- gsub("s_system","system", SOSregNiederschlagPred)#request will be replaced by req_est after sent to Rserve TODO: check other filtered strings
+  niederschlagBreakUp <- strsplit(SOSregNiederschlagPred,split = "?", fixed = T)[[1]]
   niederschlagURL <- niederschlagBreakUp[1] 
   niederschlagBreakUp <- lapply(strsplit(niederschlagBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
   niederschlagVersion <- niederschlagBreakUp[[match("version", sapply(niederschlagBreakUp, function(x) x[1]))]][2]
@@ -297,7 +318,7 @@ plot(lmMod)
 
 graphics.off()
 # 
-# if (!SOSreqFuellstandPred == "NULL" & !SOSreqNiederschlagPred == "NULL") {
+# if (!SOSregFuellstandPred == "NULL" & !SOSregNiederschlagPred == "NULL") {
 #   df <- data.frame(niederschlagVec=niederschlagPredVec, fuellstandVec=fuellstandPredVec)
 # } else {
   df <- data.frame(niederschlagVec=niederschlagPredVec, fuellstandVec=fuellstandPredVec)
