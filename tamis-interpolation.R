@@ -1,4 +1,4 @@
-# wps.des: tamis.interpolation, title = Interpolation of Wasserstand at Bevertalsperre;
+# wps.des: tamis-interpolation, title = Interpolation of Wasserstand at Bevertalsperre;
 
 # wps.in: SOSregData, string, SOS-request, 
 # abstract = SOS-request for data,
