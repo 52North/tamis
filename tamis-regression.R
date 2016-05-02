@@ -453,3 +453,27 @@ if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
 }
 
 # wps.out: model_prediction, csv;
+
+# wps.off;
+########### json
+
+library(rjson)
+metaJson <- fromJSON(file="TimeSeriesMetadataSimple.json")
+
+# readLines("TimeSeriesMetadataSimple.json")
+# str(metaJson)
+
+statLabel <- targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "featureOfInterest")]][2]
+rndId <- function() paste("ts", paste(sample(c(0:9,letters[1:6]), 32, replace = T),collapse=""), sep="_")
+
+targetJsonMeta <- list(id = rndId(),
+                       label = colnames(targetObs_STFDF@data)[1],
+                       station = list(properties = list(id = rndId(),
+                                                        label = statLabel),
+                                      geometry = list(coordinates = coordinates(targetObs_STFDF@sp),
+                                                      type="point"),
+                                      type = "Feature"))
+
+toJSON(targetJsonMeta)
+
+# wps.out: metaJson, json; 
