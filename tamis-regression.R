@@ -473,7 +473,8 @@ targetJsonMeta <- list(id = rndId(),
                                       geometry = list(coordinates = coordinates(targetObs_STFDF@sp),
                                                       type="point"),
                                       type = "Feature"))
+metaJson <- "metaJson.json"
 
-toJSON(targetJsonMeta)
+writeLines(toJSON(targetJsonMeta), metaJson)
 
 # wps.out: metaJson, json; 
