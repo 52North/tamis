@@ -28,6 +28,7 @@
 ## tamis
 library(sos4R)
 library(spacetime)
+library(rjson)
 
 as.Spatial.MonitoringPoint <- function(obj, ...) {
   
@@ -94,9 +95,9 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
 # updateStatus("Requesting SOS")
 
 # wps.off;
-sosInputNiederschlag <- NA # "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
+sosInputNiederschlag <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
-sosInputFuellstand <- NA # "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
+sosInputFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
 sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA7_Piezometer_Kalkzone&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpati-al%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
 # Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper
@@ -109,9 +110,9 @@ sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS
 # Bever-Talsperre_Sickerwassermessstelle_S2A
 # Bever-Talsperre_Sickerwassermessstelle_S2B
 
-sosInputNiederschlagPred <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
+sosInputNiederschlagPred <- NA # "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
-sosInputFuellstandPred <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
+sosInputFuellstandPred <- NA # "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
 singleInputNiederschlagPred <- NA # 10
 
@@ -122,10 +123,10 @@ if(is.na(sosInputNiederschlag) & is.na(sosInputNiederschlagPred) & is.na(singleI
   stop("At least one input type for Niederschlag must be present.")
 # TODO: stop WPS4R execution on first error??
 
-if(is.na(sosInputFuellstand) & is.na(sosInputFuellstand) & is.na(singleInputFuellstandPred))
+if(is.na(sosInputFuellstand) & is.na(sosInputFuellstandPred) & is.na(singleInputFuellstandPred))
   stop("At least one input type for Fuellstand must be present.")
 
-if ((is.na(sosInputFuellstand) | is.na(sosInputNiederschlag)) & (is.na(sosInputFuellstand) | is.na(sosInputNiederschlagPred)) & (is.na(singleInputFuellstandPred) | is.na(singleInputNiederschlagPred)))
+if ((is.na(sosInputFuellstand) | is.na(sosInputNiederschlag)) & (is.na(sosInputFuellstandPred) | is.na(sosInputNiederschlagPred)) & (is.na(singleInputFuellstandPred) | is.na(singleInputNiederschlagPred)))
   stop("At least one pair of input data must be present.")
 
 sosInputTarget <- gsub("%3D","=", sosInputTarget)
@@ -339,14 +340,22 @@ if (!is.na(singleInputNiederschlagPred)) {
 
 # match covariates
 if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
-  mIds <- match(niederschlagPred$observationData@result$phenomenonTime, 
-                fuellstandPred$observationData@result$phenomenonTime)
+  mIds <- match(strptime(niederschlagPred$observationData@result$phenomenonTime, 
+                         format="%Y-%m-%d %H:%M"), 
+                strptime(fuellstandPred$observationData@result$phenomenonTime, 
+                format="%Y-%m-%d %H:%M"))
   
   fuellstandPredVec <- as.numeric(fuellstandPred$observationData@result$Speicherfuellstand)
   fuellstandPredVec <- fuellstandPredVec[mIds[!is.na(mIds)]]
   
   niederschlagPredVec <- as.numeric(niederschlagPred$observationData@result$Niederschlagshoehe)
   niederschlagPredVec <- niederschlagPredVec[!is.na(mIds)]
+
+  predTimes <- strptime(fuellstandPred$observationData@result$phenomenonTime, 
+                        format="%Y-%m-%d %H:%M")[mIds]
+  predTimes <- as.numeric(predTimes[!is.na(predTimes)])
+} else {
+  predTimes <- as.numeric(Sys.time())
 }
 
 niederschlagPredVec[niederschlagPredVec > 200] <- NA
@@ -454,27 +463,52 @@ if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
 
 # wps.out: model_prediction, csv;
 
-# wps.off;
-########### json
+##### json
 
-library(rjson)
-metaJson <- fromJSON(file="TimeSeriesMetadataSimple.json")
-
+# metaJson <- fromJSON(file="TimeSeriesMetadataSimple.json")
+# 
 # readLines("TimeSeriesMetadataSimple.json")
-# str(metaJson)
+# str(readLines("TimeSeriesMetadataSimple.json"))
 
 statLabel <- targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "featureOfInterest")]][2]
 rndId <- function() paste("ts", paste(sample(c(0:9,letters[1:6]), 32, replace = T),collapse=""), sep="_")
 
-targetJsonMeta <- list(id = rndId(),
+rndIdInst <- rndId()
+targetJsonMeta <- list(id = rndIdInst,
                        label = colnames(targetObs_STFDF@data)[1],
-                       station = list(properties = list(id = rndId(),
+                       station = list(properties = list(id = rndIdInst,
                                                         label = statLabel),
                                       geometry = list(coordinates = coordinates(targetObs_STFDF@sp),
                                                       type="point"),
                                       type = "Feature"))
-metaJson <- "metaJson.json"
 
+metaJson <- "metaJson.json"
 writeLines(toJSON(targetJsonMeta), metaJson)
 
 # wps.out: metaJson, json; 
+
+# fromJSON(file=metaJson)
+
+# dataJson <- fromJSON(file="TimeSeriesRawData.json")
+# str(dataJson)
+# 
+# readLines("TimeSeriesRawData.json")
+# str(readLines("TimeSeriesRawData.json"))
+# 
+# dataJson[[1]]
+# 
+# str(df)
+
+bindTimeData <- cbind(predTimes, df$targetVec)
+colnames(bindTimeData) <- NULL
+bindTimeData <- apply(bindTimeData, 1, function(x) list(timestamp=x[1], value=x[2]))
+
+targetDataJson <- list(id=list(values=bindTimeData))
+names(targetDataJson) <- rndIdInst
+
+dataJson <- "dataJson.json"
+writeLines(toJSON(targetDataJson), dataJson)
+
+# wps.out: model_prediction, csv;
+
+# fromJSON(file=dataJson)
