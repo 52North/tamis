@@ -1,0 +1,18 @@
+{
+    "id": "ts_69a0a0df67ef791cd655f0a8bab9b62c",
+    "label": "Snow_patchiness@1550",
+    "station": {
+      "properties": {
+        "id": "sta_22bbc8df377555caf3a4d48fc56ce09c",
+        "label": "1550"
+      },
+      "geometry": {
+        "coordinates": [
+          23.233991038000056,
+          63.88340191100008
+        ],
+        "type": "Point"
+      },
+      "type": "Feature"
+    }
+  }
