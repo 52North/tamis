@@ -509,6 +509,6 @@ names(targetDataJson) <- rndIdInst
 dataJson <- "dataJson.json"
 writeLines(toJSON(targetDataJson), dataJson)
 
-# wps.out: model_prediction, csv;
+# wps.out: dataJson, json;
 
 # fromJSON(file=dataJson)
