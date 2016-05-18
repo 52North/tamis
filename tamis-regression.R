@@ -18,10 +18,10 @@
 # wps.in: sosInputFuellstandPred, string, SOS-request, 
 # abstract = SOS-request for prediction values: Fuellstand, minOccurs = 0, maxOccurs = 1;
 
-# wps.in: singleInputNiederschlagPred, numeric, single value, 
+# wps.in: singleInputNiederschlagPred, integer, single value, 
 # abstract = single value for prediction values: Niedreschlag, minOccurs = 0, maxOccurs = 1;
 
-# wps.in: singleInputFuellstandPred, numeric, single value, 
+# wps.in: singleInputFuellstandPred, integer, single value, 
 # abstract = single value for prediction values: Fuellstand, minOccurs = 0, maxOccurs = 1;
 
 
