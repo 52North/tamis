@@ -43,6 +43,9 @@ as.Spatial.MonitoringPoint <- function(obj, ...) {
                          proj4string = .extractCRS(obj)))
 }
 
+# rm(obs)
+# obs <- targetObs
+
 as.STFDF.list.Om_OMObservation <- function (obs) {
   sp <- do.call(rbind, lapply(obs, function(x) as.Spatial.MonitoringPoint(x@featureOfInterest@feature)))
   
@@ -58,22 +61,31 @@ as.STFDF.list.Om_OMObservation <- function (obs) {
     ids <- ids[-dropIds]
   }
     
-  data <- res[[1]]
-  colnames(data)[-1] <- ids[[1]]
-  if(length(res)>1) {
-    for (df in 2:length(res)) {
-      colnames(res[[df]])[-1] <- ids[[df]]
-      
-      data <- merge(data, res[[df]])
+  data <- as.data.frame(res[[1]])
+  if (ncol(data) > 1) {
+    colnames(data)[-1] <- ids[[1]]
+    if(length(res)>1) {
+      for (df in 2:length(res)) {
+        colnames(res[[df]])[-1] <- ids[[df]]
+        
+        data <- merge(data, res[[df]])
+      }
     }
+    
+    time <- as.POSIXct(data[,1])
+    
+    data <- data.frame(as.numeric(t(as.matrix(data[,-1]))))
+    colnames(data) <- tail(names(obs[[1]]@result),1)
+    
+    ret <- STFDF(sp, time, data)
+  } else {
+    time <- do.call(c, lapply(obs, function(x) (x@phenomenonTime@timePosition@time)))
+    data <- data.frame(do.call(c, res))
+    ret <- STIDF(sp, time, data)
+    ret <- as(ret,"STFDF")
   }
   
-  time <- as.POSIXct(data[,1])
-  
-  data <- data.frame(as.numeric(t(as.matrix(data[,-1]))))
-  colnames(data) <- tail(names(obs[[1]]@result),1)
-  
-  STFDF(sp, time, data)
+  ret
 }
 
 as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
@@ -94,12 +106,17 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
 ## 
 # updateStatus("Requesting SOS")
 
+# TerraTransfer:
+# http://tamis-sos.de:8080/52n-sos/service
+
 # wps.off;
 sosInputNiederschlag <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
 sosInputFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
-sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA7_Piezometer_Kalkzone&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpati-al%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
+# WV: http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA7_Piezometer_Kalkzone&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
+
+sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10006&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-06-01T00:00:01.00Z%2F2016-06-09T23:59:59.000Z"
 # Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper
 # Bever-Talsperre_MQA3_Piezometer_Luftseite
 # Bever-Talsperre_MQA4_Piezometer_Luftseite
@@ -142,7 +159,7 @@ targetVersion <- targetBreakUp[[match("version", sapply(targetBreakUp, function(
 
 source("~/52North/secOpts.R")
 TaMIS_SOS <- SOS(url = targetURL,
-                 version = targetVersion, binding = "KVP", curlOptions = .opts)
+                 version = targetVersion, binding = "KVP")#, curlOptions = .opts)
 
 SOSreqBreakup <- function(sosReq) {
   observedproperty <- sosReq[[match("observedProperty", sapply(sosReq, function(x) x[1]))]][2]
@@ -170,8 +187,20 @@ if(parList$observedProperty == "Wasserstand_im_Damm") {
 if(parList$observedProperty == "Schuettmenge") {
   parList$offering <- "Zeitreihen_Tageswert_Prozessleitsystem"
 }
+if(substr(parList$procedure, 1, 10) == "WaterLevel") {
+  parList$offering <- paste("WaterLevelOffering", 
+                            substr(parList$procedure, 11, nchar(parList$procedure)), sep="")
+}
 
 parList$sos <- TaMIS_SOS
+
+# debugonce(sos4R:::.getObservation_2.0.0)
+# debugonce(xmlParseDoc)
+# 
+# XML:::parserOptions  
+# example(xmlParseDoc)
+
+# foo <- xmlParseDoc(txt, options = c(NOERROR, RECOVER))
 
 targetObs <- do.call(getObservation, parList)
 
@@ -180,6 +209,19 @@ targetObs <- do.call(getObservation, parList)
 # updateStatus("Plotting observedproperty")
 
 targetObs_STFDF <- as.STFDF.list.Om_OMObservation(targetObs)
+
+if(substr(parList$procedure, 1, 10) == "WaterLevel") {
+  colnames(targetObs_STFDF@data) <- "WaterLevel"
+  targetObs_STFDF@data[[1]] <- as.numeric(as.character(targetObs_STFDF@data[[1]]))
+  
+## aggregate hourly values to daily averages
+targetObs_STFDF <- STFDF(targetObs_STFDF@sp,
+                         unique(as.Date(index(targetObs_STFDF@time), format = "%D")),
+                         as.data.frame(aggregate(targetObs_STFDF, STF(targetObs_STFDF@sp, 
+                                                  unique(as.Date(index(targetObs_STFDF@time), format = "%D")),
+                                                  endTime = as.POSIXct(unique(as.Date(index(targetObs_STFDF@time), format = "%D"))+1)),
+                             mean)[,1]))
+}
 
 targetObs_plot <- "targetObs_plot.png"
 png(file = targetObs_plot)
