@@ -43,9 +43,6 @@ as.Spatial.MonitoringPoint <- function(obj, ...) {
                          proj4string = .extractCRS(obj)))
 }
 
-# rm(obs)
-# obs <- targetObs
-
 as.STFDF.list.Om_OMObservation <- function (obs) {
   sp <- do.call(rbind, lapply(obs, function(x) as.Spatial.MonitoringPoint(x@featureOfInterest@feature)))
   
@@ -103,6 +100,21 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
   return(sp)
 }
 
+SOSreqBreakup <- function(sosReq) {
+  observedproperty <- sosReq[[match("observedProperty", sapply(sosReq, function(x) x[1]))]][2]
+  proc <- sosReq[[match("procedure", sapply(sosReq, function(x) x[1]))]][2]
+  featureOfInterest <- sosReq[[match("featureOfInterest", sapply(sosReq, function(x) x[1]))]][2]
+  responseFormat  <- sosReq[[match("responseformat", sapply(sosReq, function(x) x[1]))]][2]
+  eventTime <- sosReq[[match("temporalFilter", sapply(sosReq, function(x) x[1]))]][2]
+  
+  return(list(procedure = proc,
+              featureOfInterest = SosFeatureOfInterest(list(featureOfInterest)),
+              observedProperty = list(observedproperty),
+              eventTime = eventTime, 
+              responseFormat = responseFormat))
+}
+
+########### Script
 ## 
 # updateStatus("Requesting SOS")
 
@@ -114,9 +126,11 @@ sosInputNiederschlag <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0
 
 sosInputFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
-# WV: http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA7_Piezometer_Kalkzone&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
-
-sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10006&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-06-01T00:00:01.00Z%2F2016-06-09T23:59:59.000Z"
+# TT:
+sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10006&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-06-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+  
+# WV: 
+# sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA7_Piezometer_Kalkzone&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
 # Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper
 # Bever-Talsperre_MQA3_Piezometer_Luftseite
 # Bever-Talsperre_MQA4_Piezometer_Luftseite
@@ -135,6 +149,15 @@ singleInputNiederschlagPred <- NA # 10
 
 singleInputFuellstandPred <- NA # 293
 # wps.on;
+
+TT <- FALSE
+if (substr(sosInputTarget, 8, 19) == "tamis-sos.de")
+  TT <- TRUE
+
+WV <- FALSE
+if (substr(sosInputTarget, 8, 30) == "fluggs.wupperverband.de")
+  WV <- TRUE
+
 
 if(is.na(sosInputNiederschlag) & is.na(sosInputNiederschlagPred) & is.na(singleInputNiederschlagPred))
   stop("At least one input type for Niederschlag must be present.")
@@ -157,22 +180,18 @@ targetURL <- targetBreakUp[1]
 targetBreakUp <- lapply(strsplit(targetBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
 targetVersion <- targetBreakUp[[match("version", sapply(targetBreakUp, function(x) x[1]))]][2]
 
-source("~/52North/secOpts.R")
-TaMIS_SOS <- SOS(url = targetURL,
-                 version = targetVersion, binding = "KVP")#, curlOptions = .opts)
+if(WV) {
+  source("~/52North/secOpts.R")
+  TaMIS_SOS <- SOS(url = targetURL,
+                   version = targetVersion, binding = "KVP", 
+                   dataFieldConverters = SosDataFieldConvertingFunctions("l/s" = sosConvertDouble),
+                   curlOptions = .opts)
+}
 
-SOSreqBreakup <- function(sosReq) {
-  observedproperty <- sosReq[[match("observedProperty", sapply(sosReq, function(x) x[1]))]][2]
-  proc <- sosReq[[match("procedure", sapply(sosReq, function(x) x[1]))]][2]
-  featureOfInterest <- sosReq[[match("featureOfInterest", sapply(sosReq, function(x) x[1]))]][2]
-  responseFormat  <- sosReq[[match("responseformat", sapply(sosReq, function(x) x[1]))]][2]
-  eventTime <- sosReq[[match("temporalFilter", sapply(sosReq, function(x) x[1]))]][2]
-
-  return(list(procedure = proc,
-              featureOfInterest = SosFeatureOfInterest(list(featureOfInterest)),
-              observedProperty = list(observedproperty),
-              eventTime = eventTime, 
-              responseFormat = responseFormat))
+if (TT) {
+  TaMIS_SOS <- SOS(url = targetURL,
+                   version = targetVersion, binding = "KVP",
+                   dataFieldConverters = SosDataFieldConvertingFunctions("mNHN" = sosConvertDouble))
 }
 
 # updateStatus("Requested SOS successfully")
@@ -181,40 +200,45 @@ SOSreqBreakup <- function(sosReq) {
 
 parList <- SOSreqBreakup(targetBreakUp)
 
+# both WV scenarios
 if(parList$observedProperty == "Wasserstand_im_Damm") {
   parList$offering <- "Zeitreihen_Handeingabe"
 }
+
 if(parList$observedProperty == "Schuettmenge") {
+  TaMIS_SOS@dataFieldConverters$'l/s' <- function (x, sos) {
+    return(as.double(x = x))}
   parList$offering <- "Zeitreihen_Tageswert_Prozessleitsystem"
 }
+
+# TT scenario
 if(substr(parList$procedure, 1, 10) == "WaterLevel") {
   parList$offering <- paste("WaterLevelOffering", 
                             substr(parList$procedure, 11, nchar(parList$procedure)), sep="")
 }
 
+# merge obs for TT, remove after default!
+if (TT)
+  TaMIS_SOS@additionalKVPs <- list(mergeObservationsIntoDataArray = TRUE)
+
+# add SOS to parameters
 parList$sos <- TaMIS_SOS
 
-# debugonce(sos4R:::.getObservation_2.0.0)
-# debugonce(xmlParseDoc)
-# 
-# XML:::parserOptions  
-# example(xmlParseDoc)
-
-# foo <- xmlParseDoc(txt, options = c(NOERROR, RECOVER))
-
+# get obs for the list of the parameters/arguments in parList
 targetObs <- do.call(getObservation, parList)
 
 # updateStatus("Requested observedproperty observations successfully")
 
-# updateStatus("Plotting observedproperty")
-
 targetObs_STFDF <- as.STFDF.list.Om_OMObservation(targetObs)
 
-if(substr(parList$procedure, 1, 10) == "WaterLevel") {
+# updateStatus("targetObs_STFDF succesfully created.")
+
+# updateStatus("Plotting observedproperty:")
+
+if(substr(parList$procedure, 1, 10) == "WaterLevel" & TT) {
   colnames(targetObs_STFDF@data) <- "WaterLevel"
-  targetObs_STFDF@data[[1]] <- as.numeric(as.character(targetObs_STFDF@data[[1]]))
-  
-## aggregate hourly values to daily averages
+
+## aggregate values to daily averages
 targetObs_STFDF <- STFDF(targetObs_STFDF@sp,
                          unique(as.Date(index(targetObs_STFDF@time), format = "%D")),
                          as.data.frame(aggregate(targetObs_STFDF, STF(targetObs_STFDF@sp, 
@@ -226,14 +250,14 @@ targetObs_STFDF <- STFDF(targetObs_STFDF@sp,
 targetObs_plot <- "targetObs_plot.png"
 png(file = targetObs_plot)
 
-tmp <- stplot(targetObs_STFDF, mode="ts")
+tmp <- stplot(targetObs_STFDF, mode="ts", typ="b")
 print(tmp)
 
 graphics.off()
 
 # wps.out: targetObs_plot, png;
 
-if(parList$observedProperty == "Wasserstand_im_Damm") {
+if(parList$observedProperty == "Wasserstand_im_Damm" | TT) {
   times <- as.character(index(targetObs_STFDF@time))
 } else {
   times <- as.character(index(targetObs_STFDF@time))
@@ -405,8 +429,8 @@ niederschlagPredVec[niederschlagPredVec > 200] <- NA
 
 targetVec <- targetObs_STFDF@data[[1]]
 
-if (length(times) < 10 | any(c(is.na(sosInputFuellstand),
-                              is.na(sosInputNiederschlag)))) {
+if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
+                              is.na(sosInputNiederschlag))))) {
   load("preDefModel.RData")
   lmMod <- switch(targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "featureOfInterest")]][2],
                   'Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper' = MQA1mod,
@@ -444,6 +468,8 @@ graphics.off()
 df <- data.frame(niederschlagVec=niederschlagPredVec, fuellstandVec=fuellstandPredVec)
 
 df$targetVec <- predict(lmMod, df)
+
+df <- df[!apply(df, 1, function(x) any(is.na(x))),]
   
 # wps.out: model_diagnostics, png;
 
@@ -455,7 +481,7 @@ p2 <- xyplot(df$targetVec ~  df$fuellstandVec,
        xlab="Fuellstand",
        ylab=colnames(targetObs_STFDF@data))
 
-p3 <- xyplot(predict(lmMod, niederschlagVec=niederschlagVec, fuellstandVec=fuellstandVec) ~ targetVec,
+p3 <- xyplot(predict(lmMod, data.frame(niederschlagVec=niederschlagVec, fuellstandVec=fuellstandVec)) ~ targetVec,
      xlab=paste("Model", colnames(targetObs_STFDF@data)),
      ylab=paste("gemessen", colnames(targetObs_STFDF@data)),
      panel = function(x, y) {
@@ -473,15 +499,16 @@ grid <- data.frame(niederschlagVec = rep(seq(min(niederschlagVec, na.rm = T), ma
 grid$fuellstandVec <- rep(seq(min(fuellstandVec, na.rm = T), max(fuellstandVec, na.rm = T),length.out = 20), 20)
 grid$targetVec <- predict(lmMod, grid)
 
-p4 <- wireframe(targetVec ~ niederschlagVec + fuellstandVec, grid,
+p4 <- wireframe(targetVec ~ niederschlagVec + fuellstandVec, grid, 
                 xlab="Niederschlag",
                 ylab="Fuellstand",
                 zlab=list(colnames(targetObs_STFDF@data), rot=93),
+                scales = list(arrows=F),
+                # xlim=c(0,15), ylim=c(294.6, 295.1), zlim=c(290, 302),
                 panel =  function(x, y, z, ...) {
                   panel.wireframe(x, y, z, ...)
-                  panel.cloud(df$niederschlagVec, df$fuellstandVec, df$targetVec, ...)
-                },
-                scales = list(arrows=F))
+                  panel.cloud(x=df$niederschlagVec, y=df$fuellstandVec, z=df$targetVec, ...)
+                })
 
 relations <- "relations.png"
 png(file = relations)
