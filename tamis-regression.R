@@ -69,6 +69,9 @@ as.STFDF.list.Om_OMObservation <- function (obs) {
       }
     }
     
+    # check for NAs in time column (daylight saving time artefacts)
+    data <- data[!is.na(data[,1]),]
+    
     time <- as.POSIXct(data[,1])
     
     data <- data.frame(as.numeric(t(as.matrix(data[,-1]))))
@@ -127,8 +130,12 @@ sosInputNiederschlag <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0
 sosInputFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
 # TT:
-sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10006&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-06-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
-  
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10006&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10013&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10014&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10015&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10019&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+
 # WV: 
 # sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA7_Piezometer_Kalkzone&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
 # Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper
@@ -440,6 +447,16 @@ if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
                   'Bever-Talsperre_MQA7_Piezometer_Kalkzone' = MQA7mod,
                   'Bever-Talsperre_Sickerwassermessstelle_S2A' = S2Amod,
                   'Bever-Talsperre_Sickerwassermessstelle_S2B' = S2Bmod)
+}
+if (TT & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
+                                     is.na(sosInputNiederschlag))))) {
+  load("preDefModel.RData")
+  lmMod <- switch(targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "procedure")]][2],
+                  'WaterLevelE10006' = E10006,
+                  'WaterLevelE10013' = E10013,
+                  'WaterLevelE10014' = E10014,
+                  'WaterLevelE10015' = E10015,
+                  'WaterLevelE10019' = E10019)
 } else {
   lmMod <- lm(targetVec ~ fuellstandVec + niederschlagVec)
   # summary(lmMod)
@@ -450,11 +467,18 @@ if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
   # MQA5mod <- lmMod
   # MQA7mod <- lmMod
   
+  # E10006 <- lmMod
+  # E10013 <- lmMod
+  # E10014 <- lmMod
+  # E10015 <- lmMod
+  # E10019 <- lmMod
+  
   # S2Amod <- lmMod
   # S2Bmod <- lmMod
-  # save(MQA1mod, MQA3mod, MQA4mod, MQA5mod, MQA7mod,
-  #      S2Amod, S2Bmod,
-  #      file="preDefModel.RData")
+  save(MQA1mod, MQA3mod, MQA4mod, MQA5mod, MQA7mod,
+       S2Amod, S2Bmod,
+       E10006, E10013, E10014, E10015, E10019, 
+       file="preDefModel.RData")
 }
 
 model_diagnostics <- "model_diagnostics.png"
