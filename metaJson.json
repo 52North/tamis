@@ -1,1 +1,1 @@
-{"id":"ts_23b077753b823eeefad72a0eea4ff451","label":"Wasserstand_im_Damm","station":{"properties":{"id":"ts_23b077753b823eeefad72a0eea4ff451","label":"Bever-Talsperre_MQA7_Piezometer_Kalkzone"},"geometry":{"coordinates":[2595872.3677,5668293.3846],"type":"point"},"type":"Feature"}}
+{"id":"ts_6d5aff8b3334f571482a29a30528c00b","label":"WaterLevel","station":{"properties":{"id":"ts_6d5aff8b3334f571482a29a30528c00b","label":"water%20level%20sensor"},"geometry":{"coordinates":[7.36963,51.1421],"type":"point"},"type":"Feature"}}

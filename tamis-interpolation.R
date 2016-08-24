@@ -7,6 +7,9 @@
 # wps.in: target, type = geotiff, 
 # abstract = geotiff defining the interpolation grid (only non NAs will be interpolated);
 
+# wps.in: targetSOS, string, SOS, 
+# abstract = target SOS-URL for the output;
+
 #   <ows:Title>Plot of the target observations</ows:Title>
 #   <ows:Identifier>targetObs_plot</ows:Identifier>
 #   <ows:Title>Diagrams with model parameters</ows:Title>
@@ -37,30 +40,43 @@ as.STFDF.list.Om_OMObservation <- function (obs) {
   
   ids <- lapply(obs, function(x) x@featureOfInterest@feature@id)
   
-  if(any(sapply(res, is.null))) {
+  if (any(sapply(res, is.null))) {
     dropIds <- which(sapply(res, is.null))
     warning("The following ids have been dropped as they did not contain any data:", paste(ids[dropIds], "\n"))
+    if (length(dropIds) == length(ids))
+      stop("The list did not contain any data.")
     res <- res[-dropIds]
     sp <- sp[-dropIds]
     ids <- ids[-dropIds]
   }
   
-  data <- res[[1]]
-  colnames(data)[-1] <- ids[[1]]
-  if(length(res)>1) {
-    for (df in 2:length(res)) {
-      colnames(res[[df]])[-1] <- ids[[df]]
-      
-      data <- merge(data, res[[df]])
+  if(is.data.frame(res[[1]])) {
+    data <- res[[1]]
+    colnames(data)[-1] <- ids[[1]]
+    if(length(res)>1) {
+      for (df in 2:length(res)) {
+        colnames(res[[df]])[-1] <- ids[[df]]
+        
+        data <- merge(data, res[[df]])
+      }
     }
+    
+    time <- as.POSIXct(data[,1])
+    
+    data <- data.frame(as.numeric(t(as.matrix(data[,-1]))))
+    
+    colnames(data) <- tail(names(obs[[1]]@result),1)
+    
+    return(STFDF(sp, time, data))
+  } else {
+    data <- sapply(res, as.numeric)
+    time <- as.POSIXct(obs$observationData@phenomenonTime@timePosition@time, tz="GMT")
+    data <- as.data.frame(data)
+    
+    colnames(data) <- obs$observationData@observedProperty@href
+    
+    return(STFDF(sp, time, data, time))
   }
-  
-  time <- as.POSIXct(data[,1])
-  
-  data <- data.frame(as.numeric(t(as.matrix(data[,-1]))))
-  colnames(data) <- tail(names(obs[[1]]@result),1)
-  
-  STFDF(sp, time, data)
 }
 
 as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
@@ -90,7 +106,7 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 # 2016-02
-sosInputData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T10:00:00.00Z%2F2016-02-28T10:00:00.00Z"
+sosInputData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T00:00:00.00Z%2F2016-02-02T23:59:00.00Z"
 # 2016-01-01
 # sosInputData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T23:59:00.00Z"
 # wps.on;
@@ -137,17 +153,21 @@ if (length(strsplit(parList$eventTime, split = "%2F")[[1]]) == 1) {
 
 if(is.null(parList$offering)) {
   TaMIS_offs <- sosOfferings(TaMIS_SOS)
-  fstOccur <- min(which(sapply(TaMIS_offs, function(x) any(x@observableProperty == parList$observedProperty[[1]]))))
-  parList$offering <- names(TaMIS_offs)[4]
+  fstOccur <- max(which(sapply(TaMIS_offs, function(x) any(x@observableProperty == parList$observedProperty[[1]]))))
+  parList$offering <- names(TaMIS_offs)[fstOccur]
 }
 
 # updateStatus("Requested SOS successfully")
+
+# parList$verbose <- TRUE
 
 dataObs <- do.call(getObservation, parList)
 
 # updateStatus("Requested observedproperty observations successfully")
 
 dataObs_STFDF <- as.STFDF.list.Om_OMObservation(dataObs)
+
+# debugonce(as.STFDF.list.Om_OMObservation)
 
 dataPos <- "dataPos.png"
 png(file = dataPos)
@@ -221,30 +241,137 @@ if (n.time >= 28) {
   }
 }
 
-target <- addAttrToGeom(geometry(target), data.frame(var1.pred=apply(targetData,1,mean, na.rm=T)))
+target <- addAttrToGeom(geometry(target), as.data.frame(cbind(targetData, targetVar)))
 
 # updateStatus("Interpolated grid")
 
 if(isGrid) {
   predictions <- "predictions.tiff"
+  predVar <- "predVar.tiff"
 } else { 
   predictions <- "predictions.csv"
 }
 
 if (isGrid) {
   gridded(target) <- TRUE
-  writeGDAL(target, predictions, drivername="GTiff")
+  writeGDAL(target[,1:(ncol(target@data)/2)], predictions, drivername="GTiff")
+  writeGDAL(target[,-(1:(ncol(target@data)/2))], predVar, drivername="GTiff")
 } else {
-  write.csv(as.data.frame(target), predictions)
+  write.csv(as.data.frame(target[,1:(ncol(target@data)/2)]), predictions)
+  write.csv(as.data.frame(target[,-(1:(ncol(target@data)/2))]), predVar)
 }
 
 # wps.out: predictions, type = geotiff;
+# wps.out: predVar, type = geotiff;
 
-# wps output
-predMap <- "predMap.png"
-png(file = predMap)
-tmpPlot <- spplot(target,"var1.pred",
-                  sp.layout=list("sp.points",dataObs_STFDF@sp))
-print(tmpPlot)
-graphics.off()
-# wps.out: predMap, png;
+# if a grid is presented, a NetCDF file can be returned
+if(isGrid) {
+  target_fullGrid <- target
+  fullgrid(target_fullGrid) <- TRUE
+  
+  target_STFDF <- STFDF(geometry(target_fullGrid),
+                        dataObs_STFDF@time, 
+                        data.frame(var1.pred = unlist(target_fullGrid@data[,1:(ncol(target_fullGrid)/2)]),
+                                   var1.var = unlist(target_fullGrid@data[,-(1:(ncol(target_fullGrid)/2))])),
+                        index(dataObs_STFDF@time)+24*3600)
+
+  # wps output
+  predMap <- "predMap.png"
+  png(file = predMap)
+  tmpPlot <- stplot(target_STFDF,
+                    sp.layout=list("sp.points", dataObs_STFDF@sp))
+  print(tmpPlot)
+  graphics.off()
+  # wps.out: predMap, png;
+  
+  ## netCDF
+  library(RNetCDF)
+  ncFile <- "targetNetCDF.nc"
+  
+  nc <- create.nc(ncFile, prefill = FALSE)
+  
+  # x
+  dim.def.nc(nc, "x", target_STFDF@sp@grid@cells.dim[1])
+  var.def.nc(nc, "x", "NC_DOUBLE", "x")
+  var.put.nc(nc, "x", unique(target_STFDF@sp@coords[,"x"]))
+  
+  att.put.nc(nc, "x", "units", "NC_CHAR", "meter")
+  att.put.nc(nc, "x", "axis", "NC_CHAR", "x")
+  att.put.nc(nc, "x", "long_name", "NC_CHAR", "x")
+  att.put.nc(nc, "x", "standard_name", "NC_CHAR", "projection_x_coordinate")
+  
+  # y
+  dim.def.nc(nc, "y", target_STFDF@sp@grid@cells.dim[2])
+  var.def.nc(nc, "y", "NC_DOUBLE", "y")
+  var.put.nc(nc, "y", unique(target_STFDF@sp@coords[,"y"]))
+  
+  att.put.nc(nc, "y", "units", "NC_CHAR", "meter")
+  att.put.nc(nc, "y", "axis", "NC_CHAR", "y")
+  att.put.nc(nc, "y", "long_name", "NC_CHAR", "y")
+  att.put.nc(nc, "y", "standard_name", "NC_CHAR", "projection_y_coordinate")
+  
+  # time
+  dim.def.nc(nc, "time", length(target_STFDF@time))
+  var.def.nc(nc, "time", "NC_INT", "time")
+  var.put.nc(nc, "time", 1:length(target_STFDF@time))
+  
+  att.put.nc(nc, "time", "units", "NC_CHAR", paste("days since", index(target_STFDF@time)[1]) )
+  att.put.nc(nc, "time", "axis", "NC_CHAR", "t")
+  att.put.nc(nc, "time", "calendar", "NC_CHAR", "gregorian")
+  att.put.nc(nc, "time", "long_name", "NC_CHAR", "time")
+  att.put.nc(nc, "time", "standard_name", "NC_CHAR", "time")
+  
+  # CRS
+  var.def.nc(nc, "crs", "NC_INT", NA)
+  var.put.nc(nc, "crs", 5682)
+  att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", "EPSG:5682")
+  att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", "+proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs")
+  
+  for (var.name in colnames(target_STFDF@data)) {
+    varname <- gsub(".","", var.name, fixed=TRUE)
+    var.def.nc(nc, varname, "NC_DOUBLE", dimensions = c(2,1,0))
+    att.put.nc(nc, varname, "missing_value", "NC_DOUBLE", -99999.9)
+    dArray <- array(target_STFDF@data[[var.name]], c(target_STFDF@sp@grid@cells.dim[1],
+                                                     target_STFDF@sp@grid@cells.dim[2],
+                                                     length(target_STFDF@time)))
+    dArray <- aperm(dArray, c(3,2,1))
+    var.put.nc(nc, varname, dArray, na.mode = 0)
+  }
+  
+  close.nc(nc)
+}
+# wps.out: ncFile, NetCDF;
+
+# wps.off;
+targetSOS <- NA # "https://tamis.dev.52north.org/sos/service"
+# wps.on;
+
+if(!is.na(targetSOS)) {
+  # testDf <- data.frame(phenomenonTime=Sys.time()+1:10*60,
+  #                      test_observable_property_46_3=runif(10))
+  # testDf$phenomenonTime <- format(testDf$phenomenonTime, format = "%Y-%m-%dT%H:%M%:%S")
+  # 
+  # res <- insertMeasurements("https://tamis.dev.52north.org/sos/service",
+  #                    ts=testDf,
+  #                    coords=c(52,7),
+  #                    meta = metaMeasure,
+  #                    fieldDefs=list(phenomenonTime=c("<swe:Time definition=\"http://www.opengis.net/def/property/OGC/0/PhenomenonTime\">",
+  #                                        "<swe:uom xlink:href=\"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"/>",
+  #                                        "</swe:Time>"),
+  #                                   test_observable_property_46_3=c("<swe:Quantity definition=\"http://www.52north.org/test/observableProperty/46_3\">",
+  #                                        "<swe:uom code=\"NOT_DEFINED\"/>",
+  #                                        "</swe:Quantity>")),
+  #                    srsName = "http://www.opengis.net/def/crs/EPSG/0/4326",
+  #                    template = "inst/templates/InsertMeasurement.xml",
+  #                    header=add_headers(Authorization=tamis.dev.auth))
+  # 
+  # cat(memDecompress(res$content, type = "none", asChar = T))
+  # 
+  # 
+  # list(phenomenonTime=c("<ns:Time definition=\"http://www.opengis.net/def/property/OGC/0/PhenomenonTime\">",
+  #                       "<ns:uom xlink:href=\"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"/>",
+  #                       "</ns:Time>"),
+  #      Wasserstand_im_Damm=c("<ns:Quantity definition=\"Wasserstand_im_Damm\">",
+  #                            "<ns:uom code=\"m\"/>",
+  #                            "</ns:Quantity>"))
+}

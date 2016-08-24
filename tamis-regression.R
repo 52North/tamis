@@ -418,6 +418,9 @@ if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
                 strptime(fuellstandPred$observationData@result$phenomenonTime, 
                 format="%Y-%m-%d %H:%M"))
   
+  precipIds <- which(niederschlagPred$observationData@result$Niederschlagshoehe > 200)
+  mIds[precipIds] <- NA
+  
   fuellstandPredVec <- as.numeric(fuellstandPred$observationData@result$Speicherfuellstand)
   fuellstandPredVec <- fuellstandPredVec[mIds[!is.na(mIds)]]
   
@@ -475,10 +478,10 @@ if (TT & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
   
   # S2Amod <- lmMod
   # S2Bmod <- lmMod
-  save(MQA1mod, MQA3mod, MQA4mod, MQA5mod, MQA7mod,
-       S2Amod, S2Bmod,
-       E10006, E10013, E10014, E10015, E10019, 
-       file="preDefModel.RData")
+  # save(MQA1mod, MQA3mod, MQA4mod, MQA5mod, MQA7mod,
+  #      S2Amod, S2Bmod,
+  #      E10006, E10013, E10014, E10015, E10019, 
+  #      file="preDefModel.RData")
 }
 
 model_diagnostics <- "model_diagnostics.png"
@@ -580,18 +583,6 @@ writeLines(toJSON(targetJsonMeta), metaJson)
 
 # wps.out: metaJson, json; 
 
-# fromJSON(file=metaJson)
-
-# dataJson <- fromJSON(file="TimeSeriesRawData.json")
-# str(dataJson)
-# 
-# readLines("TimeSeriesRawData.json")
-# str(readLines("TimeSeriesRawData.json"))
-# 
-# dataJson[[1]]
-# 
-# str(df)
-
 bindTimeData <- cbind(predTimes, df$targetVec)
 colnames(bindTimeData) <- NULL
 bindTimeData <- apply(bindTimeData, 1, function(x) list(timestamp=x[1], value=x[2]))
@@ -603,4 +594,88 @@ dataJson <- "dataJson.json"
 writeLines(toJSON(targetDataJson), dataJson)
 
 # wps.out: dataJson, json;
-# fromJSON(file=dataJson)
+
+# wps.off;
+targetSOS <- "https://tamis.dev.52north.org/sos/service"
+# wps.on;
+
+## push values into target SOS
+
+if(!is.na(targetSOS)) {
+  # insert new sensor
+  
+  sensor <- list(list("key:uniqueID", paste("http://www.52north.org/test/procedure/linearRegression", 
+                                             as.numeric(Sys.time()), sep="")),
+                 list("key:longName", "52°North Initiative for Geospatial Open Source Software GmbH (http://52north.org)"),
+                 list("key:shortName", "52°North GmbH"),
+                 list("key:fieldName", "\"Offering for a linear regression\""),
+                 list("key:offeringID:name", "Offering for a linear regression"),
+                 list("key:offeringID:value", "http://www.52north.org/test/offering/linearRegression"),
+                 list("key:featureOfInterestID", "http://www.52north.org/test/featureOfInterest/linearRegression"),
+                 list("key:easting", targetObs_STFDF@sp@coords[1]),
+                 list("key:northing", targetObs_STFDF@sp@coords[2]),
+#                 list("key:altitude", 60),
+                 inputList=list(list(name="linearRegression",
+                                    definition="http://www.52north.org/test/observableProperty/linearRegression")),
+                outputList=list(list(name="test_observable_property_44_1",
+                                     scale="Category",
+                                     definition="http://www.52north.org/test/observableProperty/44_1",
+                                     codeSpace="<swe:codeSpace xlink:href=\"NOT_DEFINED\"/>"),
+                                list(name="test_observable_property_44_2",
+                                     scale="Count",
+                                     definition="http://www.52north.org/test/observableProperty/44_2"),
+                                list(name="test_observable_property_44_3",
+                                     scale="Quantity",
+                                     definition="http://www.52north.org/test/observableProperty/44_3",
+                                     uom="<swe:uom code=\"NOT_DEFINED\"/>"),
+                                list(name="test_observable_property_44_4",
+                                     scale="Text",
+                                     definition="http://www.52north.org/test/observableProperty/44_4"),
+                                list(name="test_observable_property_44_5",
+                                     scale="Boolean",
+                                     definition="http://www.52north.org/test/observableProperty/44_5")),
+                observableProperties=list("http://www.52north.org/test/observableProperty/44_1",
+                                          "http://www.52north.org/test/observableProperty/44_2",
+                                          "http://www.52north.org/test/observableProperty/44_3",
+                                          "http://www.52north.org/test/observableProperty/44_4",
+                                          "http://www.52north.org/test/observableProperty/44_5"))
+
+                 insSenRet <- insertSensor("https://tamis.dev.52north.org/sos/service", sensor,
+                                           template = "inst/templates/InsertSensor.xml", update=FALSE,
+                                           add_headers(Authorization=tamis.dev.auth))
+
+                 cat(memDecompress(insSenRet$content, type="none", asChar = T))
+  
+  
+  inputDf <- data.frame(phenomenonTime = as.POSIXct(predTimes, origin = "1970-01-01"),)
+  
+                        
+  
+  # testDf <- data.frame(phenomenonTime=Sys.time()+1:10*60,
+  #                      test_observable_property_46_3=runif(10))
+  # testDf$phenomenonTime <- format(testDf$phenomenonTime, format = "%Y-%m-%dT%H:%M%:%S")
+  # 
+  # res <- insertMeasurements("https://tamis.dev.52north.org/sos/service",
+  #                    ts=testDf,
+  #                    coords=c(52,7),
+  #                    meta = metaMeasure,
+  #                    fieldDefs=list(phenomenonTime=c("<swe:Time definition=\"http://www.opengis.net/def/property/OGC/0/PhenomenonTime\">",
+  #                                        "<swe:uom xlink:href=\"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"/>",
+  #                                        "</swe:Time>"),
+  #                                   test_observable_property_46_3=c("<swe:Quantity definition=\"http://www.52north.org/test/observableProperty/46_3\">",
+  #                                        "<swe:uom code=\"NOT_DEFINED\"/>",
+  #                                        "</swe:Quantity>")),
+  #                    srsName = "http://www.opengis.net/def/crs/EPSG/0/4326",
+  #                    template = "inst/templates/InsertMeasurement.xml",
+  #                    header=add_headers(Authorization=tamis.dev.auth))
+  # 
+  # cat(memDecompress(res$content, type = "none", asChar = T))
+  # 
+  # 
+  # list(phenomenonTime=c("<ns:Time definition=\"http://www.opengis.net/def/property/OGC/0/PhenomenonTime\">",
+  #                       "<ns:uom xlink:href=\"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"/>",
+  #                       "</ns:Time>"),
+  #      Wasserstand_im_Damm=c("<ns:Quantity definition=\"Wasserstand_im_Damm\">",
+  #                            "<ns:uom code=\"m\"/>",
+  #                            "</ns:Quantity>"))
+}
