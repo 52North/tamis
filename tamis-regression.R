@@ -134,10 +134,10 @@ sosInputFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&r
 # sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10013&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
 # sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10014&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
 # sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10015&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
-sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10019&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10019&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
 
 # WV: 
-# sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA7_Piezometer_Kalkzone&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
+sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA5_Piezometer_Berme&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
 # Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper
 # Bever-Talsperre_MQA3_Piezometer_Luftseite
 # Bever-Talsperre_MQA4_Piezometer_Luftseite
@@ -185,6 +185,7 @@ targetBreakUp <- strsplit(sosInputTarget,split = "?", fixed = T)[[1]]
 targetURL <- targetBreakUp[1] 
 
 targetBreakUp <- lapply(strsplit(targetBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
+names(targetBreakUp) <- sapply(targetBreakUp, function(x) x[1])
 targetVersion <- targetBreakUp[[match("version", sapply(targetBreakUp, function(x) x[1]))]][2]
 
 if(WV) {
@@ -442,7 +443,7 @@ targetVec <- targetObs_STFDF@data[[1]]
 if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
                               is.na(sosInputNiederschlag))))) {
   load("preDefModel.RData")
-  lmMod <- switch(targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "featureOfInterest")]][2],
+  lmMod <- switch(targetBreakUp[["featureOfInterest"]][2],
                   'Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper' = MQA1mod,
                   'Bever-Talsperre_MQA3_Piezometer_Luftseite' = MQA3mod,
                   'Bever-Talsperre_MQA4_Piezometer_Luftseite' = MQA4mod,
@@ -454,7 +455,7 @@ if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
 if (TT & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
                                      is.na(sosInputNiederschlag))))) {
   load("preDefModel.RData")
-  lmMod <- switch(targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "procedure")]][2],
+  lmMod <- switch(targetBreakUp[["procedure"]][2],
                   'WaterLevelE10006' = E10006,
                   'WaterLevelE10013' = E10013,
                   'WaterLevelE10014' = E10014,
@@ -566,7 +567,7 @@ if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
 # readLines("TimeSeriesMetadataSimple.json")
 # str(readLines("TimeSeriesMetadataSimple.json"))
 
-statLabel <- targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "featureOfInterest")]][2]
+statLabel <- targetBreakUp[["featureOfInterest"]][2]
 rndId <- function() paste("ts", paste(sample(c(0:9,letters[1:6]), 32, replace = T),collapse=""), sep="_")
 
 rndIdInst <- rndId()
@@ -603,79 +604,98 @@ targetSOS <- "https://tamis.dev.52north.org/sos/service"
 
 if(!is.na(targetSOS)) {
   # insert new sensor
+  nowSecs <- round(as.numeric(Sys.time()), 0)
   
-  sensor <- list(list("key:uniqueID", paste("http://www.52north.org/test/procedure/linearRegression", 
-                                             as.numeric(Sys.time()), sep="")),
+  targetFoi <- targetBreakUp[["featureOfInterest"]][2]
+  targetObsPropURI <- targetBreakUp[["observedProperty"]][2]
+  targetObsProp <- tail(strsplit(targetObsPropURI, "/")[[1]], 1)
+  
+  foiRet <- getFeatureOfInterest(TaMIS_SOS, featureOfInterest = targetFoi)
+  foiRet$featureMember@feature@id
+  
+  targetCoords <- as.numeric(strsplit(foiRet$featureMember@feature@shape@point@pos@pos, " ")[[1]])
+  
+  sensor <- list(list("key:uniqueID", "http://www.52north.org/test/procedure/linearRegression"),
                  list("key:longName", "52°North Initiative for Geospatial Open Source Software GmbH (http://52north.org)"),
                  list("key:shortName", "52°North GmbH"),
-                 list("key:fieldName", "\"Offering for a linear regression\""),
-                 list("key:offeringID:name", "Offering for a linear regression"),
+                 list("key:fieldName", "\"Offering of linear regression WPS\""),
+                 list("key:offeringID:name", "Offering of linear regression WPS"),
                  list("key:offeringID:value", "http://www.52north.org/test/offering/linearRegression"),
-                 list("key:featureOfInterestID", "http://www.52north.org/test/featureOfInterest/linearRegression"),
-                 list("key:easting", targetObs_STFDF@sp@coords[1]),
-                 list("key:northing", targetObs_STFDF@sp@coords[2]),
-#                 list("key:altitude", 60),
-                 inputList=list(list(name="linearRegression",
-                                    definition="http://www.52north.org/test/observableProperty/linearRegression")),
-                outputList=list(list(name="test_observable_property_44_1",
-                                     scale="Category",
-                                     definition="http://www.52north.org/test/observableProperty/44_1",
-                                     codeSpace="<swe:codeSpace xlink:href=\"NOT_DEFINED\"/>"),
-                                list(name="test_observable_property_44_2",
-                                     scale="Count",
-                                     definition="http://www.52north.org/test/observableProperty/44_2"),
-                                list(name="test_observable_property_44_3",
+                 list("key:featureOfInterestID", paste("http://www.52north.org/test/featureOfInterest/",
+                                                       targetFoi)),
+                 list("key:easting",  targetCoords[2]),
+                 list("key:northing", targetCoords[1]),
+                 inputList=list(list(name=targetObsProp,
+                                    definition=targetObsPropURI)),
+                 outputList=list(list(name=targetObsProp,
                                      scale="Quantity",
-                                     definition="http://www.52north.org/test/observableProperty/44_3",
-                                     uom="<swe:uom code=\"NOT_DEFINED\"/>"),
-                                list(name="test_observable_property_44_4",
-                                     scale="Text",
-                                     definition="http://www.52north.org/test/observableProperty/44_4"),
-                                list(name="test_observable_property_44_5",
-                                     scale="Boolean",
-                                     definition="http://www.52north.org/test/observableProperty/44_5")),
-                observableProperties=list("http://www.52north.org/test/observableProperty/44_1",
-                                          "http://www.52north.org/test/observableProperty/44_2",
-                                          "http://www.52north.org/test/observableProperty/44_3",
-                                          "http://www.52north.org/test/observableProperty/44_4",
-                                          "http://www.52north.org/test/observableProperty/44_5"))
-
-                 insSenRet <- insertSensor("https://tamis.dev.52north.org/sos/service", sensor,
-                                           template = "inst/templates/InsertSensor.xml", update=FALSE,
-                                           add_headers(Authorization=tamis.dev.auth))
-
+                                     definition=targetObsPropURI,
+                                     uom="<swe:uom code=\"NOT_DEFINED\"/>")),
+                 observableProperties=list(targetObsPropURI))
+  
+  insSenRet <- insertSensor("https://tamis.dev.52north.org/sos/service", sensor,
+                                           update=FALSE,
+                                           add_headers(Authorization=tamis.dev.auth),
+                            template="InsertSensorLinearRegression.xml")
+                 
                  cat(memDecompress(insSenRet$content, type="none", asChar = T))
   
   
-  inputDf <- data.frame(phenomenonTime = as.POSIXct(predTimes, origin = "1970-01-01"),)
+  inputDf <- data.frame(phenomenonTime = as.POSIXct(predTimes, origin = "1970-01-01"),
+                        targetVec = df[,3])
+  colnames(inputDf) <- c("phenomenonTime", targetObsProp)
   
-                        
+  fieldDefs <- list(phenomenonTime=c("<swe:Time definition=\"http://www.opengis.net/def/property/OGC/0/PhenomenonTime\">",
+                                     "<swe:uom xlink:href=\"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"/>",
+                                     "</swe:Time>"))
+  fieldDefs[[targetObsProp]] <- c(paste("<swe:Quantity definition=\"", targetObsPropURI, "\">", sep=""),
+                                  "<swe:uom code=\"NOT_DEFINED\"/>",
+                                  "</swe:Quantity>")
   
-  # testDf <- data.frame(phenomenonTime=Sys.time()+1:10*60,
-  #                      test_observable_property_46_3=runif(10))
-  # testDf$phenomenonTime <- format(testDf$phenomenonTime, format = "%Y-%m-%dT%H:%M%:%S")
+  proj4split <- sapply(strsplit(targetObs_STFDF@sp@proj4string@projargs, c(" "))[[1]],
+                       function(x) strsplit(x, "="))
+  epsgID <- which(sapply(proj4split, function(x) "+init" %in% x))
+  epsgCode <- strsplit(proj4split[[epsgID]][2], ":")[[1]][2]
+  
+  foiRet <- getFeatureOfInterest(TaMIS_SOS, featureOfInterest = targetFoi)
+  foiRet$featureMember@feature@id
+  
+  foiRet$featureMember@feature@shape@point@pos@pos
+  
+  # .gfoi <- sos4R:::.createFeatureOfInterest_2.0.0(TaMIS_SOS, targetFoi)
   # 
-  # res <- insertMeasurements("https://tamis.dev.52north.org/sos/service",
-  #                    ts=testDf,
-  #                    coords=c(52,7),
-  #                    meta = metaMeasure,
-  #                    fieldDefs=list(phenomenonTime=c("<swe:Time definition=\"http://www.opengis.net/def/property/OGC/0/PhenomenonTime\">",
-  #                                        "<swe:uom xlink:href=\"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"/>",
-  #                                        "</swe:Time>"),
-  #                                   test_observable_property_46_3=c("<swe:Quantity definition=\"http://www.52north.org/test/observableProperty/46_3\">",
-  #                                        "<swe:uom code=\"NOT_DEFINED\"/>",
-  #                                        "</swe:Quantity>")),
-  #                    srsName = "http://www.opengis.net/def/crs/EPSG/0/4326",
-  #                    template = "inst/templates/InsertMeasurement.xml",
-  #                    header=add_headers(Authorization=tamis.dev.auth))
+  # .sos <- TaMIS_SOS
+  # if (length(.sos@additionalKVPs) > 0)
+  #   if ("mergeObservationsIntoDataArray" %in% names(.sos@additionalKVPs))
+  #     .sos@additionalKVPs <- .sos@additionalKVPs[-which(names(.sos@additionalKVPs) == "mergeObservationsIntoDataArray")]
   # 
-  # cat(memDecompress(res$content, type = "none", asChar = T))
+  # .responseString = sos4R:::.sosRequest_2.0.0(sos = .sos, request = .gfoi, verbose=T)
   # 
-  # 
-  # list(phenomenonTime=c("<ns:Time definition=\"http://www.opengis.net/def/property/OGC/0/PhenomenonTime\">",
-  #                       "<ns:uom xlink:href=\"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"/>",
-  #                       "</ns:Time>"),
-  #      Wasserstand_im_Damm=c("<ns:Quantity definition=\"Wasserstand_im_Damm\">",
-  #                            "<ns:uom code=\"m\"/>",
-  #                            "</ns:Quantity>"))
+  # cat(.responseString)
+  
+  # debugonce(getFeatureOfInterest)
+  
+  metaMeasure <- list(list("key:offering","http://www.52north.org/test/offering/linearRegression"),
+                      list("key:description", "predictions based on a linear regression"),
+                      list("key:identifier", paste("http://www.52north.org/test/observation/",
+                                                   nowSecs, sep="")),
+                      list("key:procedure", "\"http://www.52north.org/test/procedure/linearRegression\""),
+                      list("key:obsProp", paste("\"http://www.52north.org/test/observableProperty/",
+                                                targetObsProp, "\"", sep="")),
+                      list("key:wml:gml:id", paste("\"", foiRet$featureMember@feature@id, "\"", sep="")),
+                      list("key:resultTime", as.character(format(as.POSIXct(nowSecs, origin="1970-01-01"),
+                                                                     format="%Y-%m-%dT%H:%MZ"))))#,
+                      # list("key:gml:identifier","http://www.52north.org/test/featureOfInterest/46"),
+                      # list("key:gml:name", "52° North"),
+                      # list("key:sampledFeature", "\"http://www.52north.org/test/featureOfInterest/sf_46\""),
+                      # list("key:point:gml:id","\"test_feature_46\""))
+  
+  insMeasRet <- insertMeasurements(targetSOS, ts=inputDf, 
+                                   meta = metaMeasure,
+                                   fieldDefs = fieldDefs,
+                                   srsName = "http://www.opengis.net/def/crs/EPSG/0/31466",
+                                   template = "InsertMeasurementLinearRegression.xml",
+                                   header=add_headers(Authorization=tamis.dev.auth))
+
+  cat(memDecompress(insMeasRet$content, type = "none", asChar = T))
 }

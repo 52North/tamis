@@ -1,1 +1,1 @@
-{"id":"ts_6d5aff8b3334f571482a29a30528c00b","label":"WaterLevel","station":{"properties":{"id":"ts_6d5aff8b3334f571482a29a30528c00b","label":"water%20level%20sensor"},"geometry":{"coordinates":[7.36963,51.1421],"type":"point"},"type":"Feature"}}
+{"id":"ts_3e6cde55b8a741007f9f3173cc32fc85","label":"Wasserstand_im_Damm","station":{"properties":{"id":"ts_3e6cde55b8a741007f9f3173cc32fc85","label":"Bever-Talsperre_MQA5_Piezometer_Berme"},"geometry":{"coordinates":[2595883.1977,5668315.1396],"type":"point"},"type":"Feature"}}

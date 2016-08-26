@@ -134,6 +134,8 @@ dataURL <- dataBreakUp[1]
 dataBreakUp <- lapply(strsplit(dataBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
 dataVersion <- dataBreakUp[[match("version", sapply(dataBreakUp, function(x) x[1]))]][2]
 
+obsProp <- dataBreakUp[[which(sapply(dataBreakUp, function(x) x[1]) == "observedProperty")]][2] 
+
 parList <- SOSreqBreakup(dataBreakUp)
 
 source("~/52North/secOpts.R")
@@ -265,6 +267,7 @@ if (isGrid) {
 # wps.out: predVar, type = geotiff;
 
 # if a grid is presented, a NetCDF file can be returned
+
 if(isGrid) {
   target_fullGrid <- target
   fullgrid(target_fullGrid) <- TRUE
@@ -329,25 +332,24 @@ if(isGrid) {
   
   # CRS
   var.def.nc(nc, "crs", "NC_INT", NA)
-  var.put.nc(nc, "crs", 5682)
-  att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", "EPSG:5682")
+  var.put.nc(nc, "crs", 31466)
+  att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", "EPSG:31466")
   att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", "+proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs")
   
-  targetVar <- dataBreakUp[[which(sapply(dataBreakUp, function(x) x[1]) == "observedProperty")]][2] 
+  var.def.nc(nc, obsProp, "NC_DOUBLE", NA)
+  att.put.nc(nc, obsProp, "ancillary_variables", "NC_CHAR", "var1pred var1var")
+  att.put.nc(nc, obsProp, "ref", "NC_CHAR", "http://www.uncertml.org/distributions/normal")
+  att.put.nc(nc, obsProp, "shape", "NC_CHAR", "x y t")
   
-  var.def.nc(nc, targetVar, "NC_DOUBLE", NA)
-  att.put.nc(nc, targetVar, "ancillary_variables", "NC_CHAR", "var1pred var1var")
-  att.put.nc(nc, targetVar, "ref", "NC_CHAR", "http://www.uncertml.org/distributions/normal")
-  att.put.nc(nc, targetVar, "shape", "NC_CHAR", "x y t")
-  
-  UncertML <- list(var1.pred = "http://www.uncertml.org/statistics/mean",
-                   var1.var = "http://www.uncertml.org/statistics/variance")
+  UncertML <- list(var1.pred = "http://www.uncertml.org/distributions/normal#mean",
+                   var1.var = "http://www.uncertml.org/distributions/normal#variance")
 
   for (var.name in colnames(target_STFDF@data)) {
     varname <- gsub(".","", var.name, fixed=TRUE)
     var.def.nc(nc, varname, "NC_DOUBLE", dimensions = c(2,1,0))
     att.put.nc(nc, varname, "missing_value", "NC_DOUBLE", -99999.9)
     att.put.nc(nc, varname, "ref", "NC_CHAR", UncertML[[var.name]])
+    att.put.nc(nc, varname, "grid_mapping", "NC_CHAR", "crs")
     dArray <- array(target_STFDF@data[[var.name]], c(target_STFDF@sp@grid@cells.dim[1],
                                                      target_STFDF@sp@grid@cells.dim[2],
                                                      length(target_STFDF@time)))
@@ -356,15 +358,64 @@ if(isGrid) {
   }
   
   att.put.nc(nc, "NC_GLOBAL", "Conventions", "NC_CHAR", "CF-1.5 UW-1.0")
-  att.put.nc(nc, "NC_GLOBAL", "primary_variables", "NC_CHAR", targetVar)
+  att.put.nc(nc, "NC_GLOBAL", "primary_variables", "NC_CHAR", obsProp)
   
   close.nc(nc)
 }
 # wps.out: ncFile, NetCDF;
 
+stplot(target_STFDF[,,"var1.pred"])
+
 # wps.off;
 targetSOS <- NA # "https://tamis.dev.52north.org/sos/service"
 # wps.on;
+
+nowSecs <- round(as.numeric(Sys.time()),0)
+sensor <- list(list("key:uniqueID", paste("http://www.52north.org/test/procedure/krigingWPS", 
+                                          nowSecs, sep="_")),
+               list("key:longName", "52°North Initiative for Geospatial Open Source Software GmbH (http://52north.org)"),
+               list("key:shortName", "52°North GmbH"),
+               list("key:fieldName", "\"Offering for Web Processing Services\""),
+               list("key:offeringID:name", "Offering for Web Processing Services"),
+               list("key:offeringID:value", "http://www.52north.org/test/offering/wps"),
+               list("key:featureOfInterestID", paste("http://www.52north.org/test/featureOfInterest/grid",
+                                                     nowSec,sep="_")),
+               # centroid
+               list("key:easting", mean(target_STFDF@sp@bbox[1,])),
+               list("key:northing", mean(target_STFDF@sp@bbox[2,])),
+               #                 list("key:altitude", 60),
+               inputList=list(list(name=obsProp,
+                                   definition=paste("http://www.52north.org/test/observableProperty/",
+                                                    obsProp, sep="")),
+               outputList=list(list(name=obsProp,
+                                    scale="Category",
+                                    definition=paste("http://www.52north.org/test/observableProperty/",
+                                                     obsProp, sep=""),
+                                    codeSpace="<swe:codeSpace xlink:href=\"NOT_DEFINED\"/>"),
+                               list(name="test_observable_property_44_2",
+                                    scale="Count",
+                                    definition="http://www.52north.org/test/observableProperty/44_2"),
+                               list(name="test_observable_property_44_3",
+                                    scale="Quantity",
+                                    definition="http://www.52north.org/test/observableProperty/44_3",
+                                    uom="<swe:uom code=\"NOT_DEFINED\"/>"),
+                               list(name="test_observable_property_44_4",
+                                    scale="Text",
+                                    definition="http://www.52north.org/test/observableProperty/44_4"),
+                               list(name="test_observable_property_44_5",
+                                    scale="Boolean",
+                                    definition="http://www.52north.org/test/observableProperty/44_5")),
+               observableProperties=list("http://www.52north.org/test/observableProperty/44_1",
+                                         "http://www.52north.org/test/observableProperty/44_2",
+                                         "http://www.52north.org/test/observableProperty/44_3",
+                                         "http://www.52north.org/test/observableProperty/44_4",
+                                         "http://www.52north.org/test/observableProperty/44_5"))
+
+insSenRet <- insertSensor("https://tamis.dev.52north.org/sos/service", sensor,
+                          template = "inst/templates/InsertSensor.xml", update=FALSE,
+                          add_headers(Authorization=tamis.dev.auth))
+
+cat(memDecompress(insSenRet$content, type="none", asChar = T))
 
 if(!is.na(targetSOS)) {
   # testDf <- data.frame(phenomenonTime=Sys.time()+1:10*60,
