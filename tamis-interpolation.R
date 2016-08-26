@@ -106,7 +106,7 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 # 2016-02
-sosInputData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T00:00:00.00Z%2F2016-02-02T23:59:00.00Z"
+sosInputData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T00:00:00.00Z%2F2016-02-29T23:59:00.00Z"
 # 2016-01-01
 # sosInputData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T23:59:00.00Z"
 # wps.on;
@@ -188,7 +188,7 @@ class(empVgm) <- c("gstatVariogram","data.frame")
 
 empVgm <- empVgm[empVgm$np>0,]
 
-if(n.time >= 20) {
+if(n.time >= 10) {
   fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma),"Lin",60))
   tmpPlot <- plot(empVgm, fitVgm)
 } else {
@@ -227,7 +227,7 @@ colnames(dataObs_STFDF@sp@coords) <- c("x","y")
 targetData <- NULL
 targetVar <- NULL
 
-if (n.time >= 28) {
+if (n.time >= 10) {
   for (day in 1:n.time) {
     pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
     targetData <- cbind(targetData, pred$var1.pred)
@@ -288,6 +288,12 @@ if(isGrid) {
   library(RNetCDF)
   ncFile <- "targetNetCDF.nc"
   
+  # ncBioTemp <- open.nc("biotemperature_normalDistr.nc")
+  # att.inq.nc(ncBioTemp,
+  #            ,)
+  #            
+  # RNetCDF::file.inq.nc(ncBioTemp)
+  # 
   nc <- create.nc(ncFile, prefill = FALSE)
   
   # x
@@ -327,16 +333,30 @@ if(isGrid) {
   att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", "EPSG:5682")
   att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", "+proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs")
   
+  targetVar <- dataBreakUp[[which(sapply(dataBreakUp, function(x) x[1]) == "observedProperty")]][2] 
+  
+  var.def.nc(nc, targetVar, "NC_DOUBLE", NA)
+  att.put.nc(nc, targetVar, "ancillary_variables", "NC_CHAR", "var1pred var1var")
+  att.put.nc(nc, targetVar, "ref", "NC_CHAR", "http://www.uncertml.org/distributions/normal")
+  att.put.nc(nc, targetVar, "shape", "NC_CHAR", "x y t")
+  
+  UncertML <- list(var1.pred = "http://www.uncertml.org/statistics/mean",
+                   var1.var = "http://www.uncertml.org/statistics/variance")
+
   for (var.name in colnames(target_STFDF@data)) {
     varname <- gsub(".","", var.name, fixed=TRUE)
     var.def.nc(nc, varname, "NC_DOUBLE", dimensions = c(2,1,0))
     att.put.nc(nc, varname, "missing_value", "NC_DOUBLE", -99999.9)
+    att.put.nc(nc, varname, "ref", "NC_CHAR", UncertML[[var.name]])
     dArray <- array(target_STFDF@data[[var.name]], c(target_STFDF@sp@grid@cells.dim[1],
                                                      target_STFDF@sp@grid@cells.dim[2],
                                                      length(target_STFDF@time)))
     dArray <- aperm(dArray, c(3,2,1))
     var.put.nc(nc, varname, dArray, na.mode = 0)
   }
+  
+  att.put.nc(nc, "NC_GLOBAL", "Conventions", "NC_CHAR", "CF-1.5 UW-1.0")
+  att.put.nc(nc, "NC_GLOBAL", "primary_variables", "NC_CHAR", targetVar)
   
   close.nc(nc)
 }
