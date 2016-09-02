@@ -42,6 +42,7 @@
                             </swe:field>
                         </swe:SimpleDataRecord>
                     </sml:capabilities>
+                    <!--
                     <sml:capabilities name="parentProcedures">
                         <swe:SimpleDataRecord>
                             <swe:field name="parentProcedure">
@@ -51,6 +52,7 @@
                             </swe:field>
                         </swe:SimpleDataRecord>
                     </sml:capabilities>
+                    -->
                     <sml:capabilities name="featuresOfInterest">
                         <swe:SimpleDataRecord>
                             <swe:field name="featureOfInterestID">

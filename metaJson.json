@@ -1,1 +1,1 @@
-{"id":"ts_3e6cde55b8a741007f9f3173cc32fc85","label":"Wasserstand_im_Damm","station":{"properties":{"id":"ts_3e6cde55b8a741007f9f3173cc32fc85","label":"Bever-Talsperre_MQA5_Piezometer_Berme"},"geometry":{"coordinates":[2595883.1977,5668315.1396],"type":"point"},"type":"Feature"}}
+{"id":"ts_3c78531292e0c36153c241960bf6049f","label":"Wasserstand_im_Damm","station":{"properties":{"id":"ts_3c78531292e0c36153c241960bf6049f","label":"Bever-Talsperre_MQA3_Piezometer_Luftseite"},"geometry":{"coordinates":[2595892.9209,5668334.0811],"type":"point"},"type":"Feature"}}
