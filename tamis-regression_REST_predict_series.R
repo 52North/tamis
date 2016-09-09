@@ -2,28 +2,28 @@
 
 # wps.in: timeseries_Niederschlag, string, TS URI, 
 # abstract = timeseries Id for Niederschlag, minOccurs = 0, maxOccurs = 1,
-# value = "http://www.fluggs.de/sos2/api/v1/timeseries/427"
+# value = "http://www.fluggs.de/sos2/api/v1/timeseries/427";
 
 # wps.in: timeseries_Fuellstand, string, TS URI, 
 # abstract = timeseries Id for Fuellstand, minOccurs = 0, maxOccurs = 1,
-# value = "http://www.fluggs.de/sos2/api/v1/timeseries/26"
+# value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
 # wps.in: timeseries_Zielvariable, string, TS URI, 
 # abstract = timeseries Id for the target variable,
-# value = "http://www.fluggs.de/sos2/api/v1/timeseries/194"
+# value = "http://www.fluggs.de/sos2/api/v1/timeseries/194";
 
 # wps.in: timespan, string, timespan of reference period, 
 # abstract = timeseries Id for the target variable,
-# value = "http://www.fluggs.de/sos2/api/v1/timeseries/194"
+# value = "2016-01-01T/2016-02-29TZ";
 
 # wps.in: timeseries_predict_Niederschlag, integer, single value, 
-# abstract = single value for prediction values: Niederschlag, minOccurs = 0, maxOccurs = 1;
+# abstract = single value for prediction values: Niederschlag, minOccurs = 1, maxOccurs = 1;
 
 # wps.in: timeseries_predict_Fuellstand, integer, single value, 
-# abstract = single value for prediction values: Fuellstand, minOccurs = 0, maxOccurs = 1;
+# abstract = single value for prediction values: Fuellstand, minOccurs = 1, maxOccurs = 1;
 
 # wps.in: timespan_predict, string, prediction time stamp, 
-# abstract = single timestamp for which the prediction shall be made: Fuellstand, minOccurs = 0, maxOccurs = 1;
+# abstract = single timestamp for which the prediction shall be made: Fuellstand, minOccurs = 1, maxOccurs = 1;
 
 #################################
 
