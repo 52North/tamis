@@ -10,7 +10,7 @@
 
 # wps.in: timeseries_Zielvariable, string, TS URI, 
 # abstract = timeseries Id for the target variable,
-# value = "http://www.fluggs.de/sos2/api/v1/timeseries/194";
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/513";
 
 # wps.in: timespan, string, timespan of reference period, 
 # abstract = timeseries Id for the target variable,
@@ -34,7 +34,7 @@
 timeseries_Niederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseries_Fuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseries_Zielvariable <- "http://www.fluggs.de/sos2/api/v1/timeseries/194"
+timeseries_Zielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
 
@@ -44,6 +44,12 @@ singleInput_Zeitstempel <- "2016-03-03T14:00:00Z"
 #wps.on;
 
 # wps.import: tamis-regression-common.R;
+
+# wps.off;
+
+source("tamis-regression-common.R")
+
+# wps.on;
 
 # wps.out: model_diagnostics, png;
 
@@ -83,7 +89,8 @@ write.csv(predDf, file = model_prediction)
 # str(readLines("TimeSeriesMetadataSimple.json"))
 
 statLabel <- targetVarMeta$station$properties$label
-rndId <- function() paste("ts", paste(sample(c(0:9,letters[1:6]), 32, replace = T), collapse=""), sep="_")
+rndId <- function() paste("ts", paste(sample(c(0:9,letters[1:6]), 32,
+                                             replace = T), collapse=""), sep="_")
 
 rndIdInst <- rndId()
 targetJsonMeta <- list(id = rndIdInst,

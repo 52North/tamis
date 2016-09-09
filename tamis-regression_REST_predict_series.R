@@ -10,7 +10,7 @@
 
 # wps.in: timeseries_Zielvariable, string, TS URI, 
 # abstract = timeseries URI for the target variable,
-# value = "http://www.fluggs.de/sos2/api/v1/timeseries/194";
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/513";
 
 # wps.in: timespan, string, timespan of reference period, 
 # abstract = timeseries URI for the target variable,
@@ -34,12 +34,18 @@
 timeseries_Niederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseries_Fuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseries_Zielvariable <- "http://www.fluggs.de/sos2/api/v1/timeseries/194"
+timeseries_Zielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
 #wps.on;
 
 # wps.import: tamis-regression-common.R;
+
+# wps.off;
+
+source("tamis-regression-common.R")
+
+# wps.on;
 
 # wps.out: model_diagnostics, png;
 
@@ -60,11 +66,11 @@ timespan_predict <- "2016-03-01T/2016-03-31TZ"
 
 precip <- readTSdata(timeseries_Niederschlag, timespan_predict)
 fillLevel <- readTSdata(timeseries_Fuellstand, timespan_predict)
-targetVar <- readTSdata(timeseries_Zielvariable, timespan_predict)
+targetVar <- readTSdata(timeseries_Zielvariable, timespan_predict, .opts)
 
 precipMeta <- readTSmeta(timeseries_Niederschlag)
 fillLevelMeta <- readTSmeta(timeseries_Fuellstand)
-targetVarMeta <- readTSmeta(timeseries_Zielvariable)
+targetVarMeta <- readTSmeta(timeseries_Zielvariable, .opts)
 # synchronise data sets
 
 #precipitation

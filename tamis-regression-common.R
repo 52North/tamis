@@ -1,16 +1,29 @@
 ## tamins regression common part
 
 library(RCurl)
+library(httr)
 library(rjson)
 library(sp)
 library(xts)
 library(spacetime)
 
-readTSdata <- function(ts_URI, timespan) {
-  meta <- getURLContent(ts_URI)
+readTSdata <- function(ts_URI, timespan, .opts, ...) {
+  if(!missing(.opts))
+    meta <- GET(ts_URI, do.call(config, .opts), ...)
+  else
+    meta <- GET(ts_URI)
+  
+  meta <- memDecompress(meta$content, "none", asChar = T)
+  meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
   meta <- fromJSON(meta)
   
-  ts <- getURLContent(paste(ts_URI, "/getData?timespan=", timespan, sep=""))
+  if(!missing(.opts))
+    ts <- GET(paste(ts_URI, "/getData?timespan=", timespan, sep=""), do.call(config, .opts), ...)
+  else 
+    ts <- GET(paste(ts_URI, "/getData?timespan=", timespan, sep=""))
+  
+  ts <- memDecompress(ts$content, "none", asChar = T)
+  ts <- substr(ts, gregexpr("\"values", ts)[[1]][1]-1, nchar(ts))
   ts <- fromJSON(ts)
   
   ts <- do.call(rbind, ts$values)
@@ -26,18 +39,26 @@ readTSdata <- function(ts_URI, timespan) {
   STFDF(SpatialPoints(coords), ts[,1], ts[,-1,drop=F])
 }
 
-readTSmeta <- function(ts_URI=timeseries_Niederschlag) {
-  meta <- getURLContent(ts_URI)
+readTSmeta <- function(ts_URI, .opts, ...) {
+  if(!missing(.opts))
+    meta <- GET(ts_URI, do.call(config, .opts), ...)
+  else
+    meta <- GET(ts_URI, ...)
+  meta <- memDecompress(meta$content, "none", asChar = T)
+  meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
   fromJSON(meta)
 }
 
+source("~/52North/secOpts.R")
+
 precip <- readTSdata(timeseries_Niederschlag, timespan)
 fillLevel <- readTSdata(timeseries_Fuellstand, timespan)
-targetVar <- readTSdata(timeseries_Zielvariable, timespan)
+targetVar <- readTSdata(ts_URI = timeseries_Zielvariable, timespan, .opts)
 
 precipMeta <- readTSmeta(timeseries_Niederschlag)
 fillLevelMeta <- readTSmeta(timeseries_Fuellstand)
-targetVarMeta <- readTSmeta(timeseries_Zielvariable)
+targetVarMeta <- readTSmeta(timeseries_Zielvariable, .opts)
+
 # synchronise data sets
 
 #precipitation
