@@ -1,4 +1,4 @@
-# wps.des: tamis-prediction-regression, title = TaMIS Prediction Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
+# wps.des: tamis-prediction-single, title = TaMIS Prediction Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
 
 # wps.in: timeseries_Niederschlag, string, TS URI, 
 # abstract = timeseries Id for Niederschlag, minOccurs = 0, maxOccurs = 1,
