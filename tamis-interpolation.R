@@ -289,7 +289,7 @@ if(isGrid) {
   
   ## netCDF
   library(RNetCDF)
-  ncFile <- "targetNetCDF.nc"
+  ncFile <- "targetnetcdf.nc"
   
   # ncBioTemp <- open.nc("biotemperature_normalDistr.nc")
   # att.inq.nc(ncBioTemp,
@@ -362,7 +362,7 @@ if(isGrid) {
   
   close.nc(nc)
 }
-# wps.out: ncFile, NetCDF;
+# wps.out: ncFile, netcdf;
 
 stplot(target_STFDF[,,"var1.pred"])
 
