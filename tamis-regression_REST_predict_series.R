@@ -1,29 +1,32 @@
 # wps.des: tamis-prediction-series, title = TaMIS Prediction Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
 
 # wps.in: timeseries_Niederschlag, string, TS URI, 
-# abstract = timeseries Id for Niederschlag, minOccurs = 1, maxOccurs = 1,
+# abstract = timeseries Id for Niederschlag,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/427";
 
 # wps.in: timeseries_Fuellstand, string, TS URI, 
-# abstract = timeseries URI for Fuellstand, minOccurs = 1, maxOccurs = 1,
+# abstract = timeseries URI for Fuellstand,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
 # wps.in: timeseries_Zielvariable, string, TS URI, 
-# abstract = timeseries URI for the target variable, minOccurs = 1, maxOccurs = 1,
+# abstract = timeseries URI for the target variable,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/194";
 
 # wps.in: timespan, string, timespan of reference period, 
-# abstract = timeseries URI for the target variable, minOccurs = 1, maxOccurs = 1,
+# abstract = timeseries URI for the target variable,
 # value = "2016-01-01T/2016-02-29TZ";
 
-# wps.in: timeseries_predict_Niederschlag, string, single value, 
-# abstract = timeseries URI for prediction values: Niederschlag, minOccurs = 1, maxOccurs = 1;
+# wps.in: timeseries_predict_Niederschlag, string, TS URI, 
+# abstract = timeseries URI for prediction values: Niederschlag,
+# value = "http://www.fluggs.de/sos2/api/v1/timeseries/427";
 
-# wps.in: timeseries_predict_Fuellstand, string, single value, 
-# abstract = timeseries URI for prediction values: Fuellstand, minOccurs = 1, maxOccurs = 1;
+# wps.in: timeseries_predict_Fuellstand, string, TS URI, 
+# abstract = timeseries URI for prediction values: Fuellstand,
+# value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
 # wps.in: timespan_predict, string, prediction time stamp, 
-# abstract = timestamp for which the prediction shall be made: Fuellstand, minOccurs = 1, maxOccurs = 1;
+# abstract = timestamp for which the prediction shall be made,
+# value = "2016-03-01T/2016-03-31TZ";
 
 #################################
 
