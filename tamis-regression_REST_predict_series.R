@@ -39,7 +39,7 @@ timeseries_Zielvariable <- "http://www.fluggs.de/sos2/api/v1/timeseries/194"
 timespan <- "2016-01-01T/2016-02-29TZ"
 #wps.on;
 
-source("tamis-regression-common.R")
+# wps.import: tamis-regression-common.R;
 
 # wps.out: model_diagnostics, png;
 

@@ -43,7 +43,7 @@ singleInput_Fuellstand <- 290
 singleInput_Zeitstempel <- "2016-03-03T14:00:00Z"
 #wps.on;
 
-source("tamis-regression-common.R")
+# wps.import: tamis-regression-common.R;
 
 # wps.out: model_diagnostics, png;
 
