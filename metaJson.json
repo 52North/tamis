@@ -1,1 +1,1 @@
-{"id":"ts_3c78531292e0c36153c241960bf6049f","label":"Wasserstand_im_Damm","station":{"properties":{"id":"ts_3c78531292e0c36153c241960bf6049f","label":"Bever-Talsperre_MQA3_Piezometer_Luftseite"},"geometry":{"coordinates":[2595892.9209,5668334.0811],"type":"point"},"type":"Feature"}}
+{"id":"ts_cc93333ce2345519892f297fdacb62bc","label":"Wassertemperatur","station":{"properties":{"id":"ts_cc93333ce2345519892f297fdacb62bc","label":"Bever-Talsperre, Absperrbauwerk"},"geometry":{"coordinates":[7.3671139314664,51.1430970061006],"type":"point"},"type":"Feature"}}
