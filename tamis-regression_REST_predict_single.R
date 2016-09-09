@@ -70,10 +70,6 @@ predDf$fillLevel <- lstTSDf$fillLevel + 0:diffHours*diffFillLevel/diffHours
 
 predDf$predVar <- predict(lmMod, predDf)
 
-plot(predVar ~ time, predDf)
-plot(precip ~ time, predDf)
-plot(fillLevel ~ time, predDf)
-
 model_prediction <- "model_prediction.csv"
 write.csv(predDf, file = model_prediction)
 
