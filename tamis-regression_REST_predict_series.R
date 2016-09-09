@@ -8,7 +8,7 @@
 # abstract = timeseries Id for Fuellstand, minOccurs = 0, maxOccurs = 1,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-# wps.in: timeseries_target, string, TS URI, 
+# wps.in: timeseries_Zielvariable, string, TS URI, 
 # abstract = timeseries Id for the target variable,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/194"
 
@@ -16,13 +16,13 @@
 # abstract = timeseries Id for the target variable,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/194"
 
-# wps.in: timeseries_input_Niederschlag, integer, single value, 
+# wps.in: timeseries_predict_Niederschlag, integer, single value, 
 # abstract = single value for prediction values: Niederschlag, minOccurs = 0, maxOccurs = 1;
 
-# wps.in: timeseries_input_Fuellstand, integer, single value, 
+# wps.in: timeseries_predict_Fuellstand, integer, single value, 
 # abstract = single value for prediction values: Fuellstand, minOccurs = 0, maxOccurs = 1;
 
-# wps.in: timespan_input, string, prediction time stamp, 
+# wps.in: timespan_predict, string, prediction time stamp, 
 # abstract = single timestamp for which the prediction shall be made: Fuellstand, minOccurs = 0, maxOccurs = 1;
 
 #################################

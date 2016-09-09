@@ -8,7 +8,7 @@
 # abstract = timeseries Id for Fuellstand, minOccurs = 0, maxOccurs = 1,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-# wps.in: timeseries_target, string, TS URI, 
+# wps.in: timeseries_Zielvariable, string, TS URI, 
 # abstract = timeseries Id for the target variable,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/194"
 
