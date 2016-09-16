@@ -1,10 +1,14 @@
-# wps.des: tamis-interpolation-rest, title = Interpolation of Wasserstand at Bevertalsperre;
+# wps.des: tamis-rest-interpolation, title = Interpolation of Schüttmenge at Bevertalsperre;
 
 # POST oder GETrequests, wie werden die dAten geliefert?
 
-# wps.in: timeseries, string, TS URI, 
+# wps.in: timeseries, string, set of TS URIs, whitespace " " seperated, 
 # abstract = timeseries URI as datasource,
-# value = 
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469"
+
+# wps.in: timespan, string, timespan of input data, 
+# abstract = timeseries URI for the interpolation variable,
+# value = "2016-01-01T/2016-01-07TZ";
 
 # wps.in: target, type = geotiff, 
 # abstract = geotiff defining the interpolation grid (only non NAs will be interpolated);
@@ -12,180 +16,116 @@
 # wps.in: targetSOS, string, SOS, 
 # abstract = target SOS-URL for the output;
 
-#   <ows:Title>Plot of the target observations</ows:Title>
-#   <ows:Identifier>targetObs_plot</ows:Identifier>
-#   <ows:Title>Diagrams with model parameters</ows:Title>
-#   <ows:Identifier>model_diagnostics</ows:Identifier>
-#   <ows:Title>Relations between observed properties</ows:Title>
-#   <ows:Identifier>relations</ows:Identifier>
-#   <ows:Title>Interpolated Values</ows:Title>
-#   <ows:Identifier>interpolated-values</ows:Identifier>                           
-
-
-as.Spatial.MonitoringPoint <- function(obj, ...) {
-  
-  .extractCRS <- function(obj) {
-    chars <- strsplit(obj@shape@point@pos@srsName, "/", fixed=T)[[1]]
-    stopifnot(any(c("EPSG","epsg") %in% chars))
-    CRS(paste("+init=epsg:", tail(chars,1), sep = ""))
-  }
-  
-  if("point" %in% slotNames(obj@shape))
-    return(SpatialPoints(matrix(rev(as.numeric(strsplit(obj@shape@point@pos@pos, " ", fixed=T)[[1]])), ncol = 2),
-                         proj4string = .extractCRS(obj)))
-}
-
-as.STFDF.list.Om_OMObservation <- function (obs) {
-  sp <- do.call(rbind, lapply(obs, function(x) as.Spatial.MonitoringPoint(x@featureOfInterest@feature)))
-  
-  res <- lapply(obs, function(x) x@result)
-  
-  ids <- lapply(obs, function(x) x@featureOfInterest@feature@id)
-  
-  if (any(sapply(res, is.null))) {
-    dropIds <- which(sapply(res, is.null))
-    warning("The following ids have been dropped as they did not contain any data:", paste(ids[dropIds], "\n"))
-    if (length(dropIds) == length(ids))
-      stop("The list did not contain any data.")
-    res <- res[-dropIds]
-    sp <- sp[-dropIds]
-    ids <- ids[-dropIds]
-  }
-  
-  if(is.data.frame(res[[1]])) {
-    data <- res[[1]]
-    colnames(data)[-1] <- ids[[1]]
-    if(length(res)>1) {
-      for (df in 2:length(res)) {
-        colnames(res[[df]])[-1] <- ids[[df]]
-        
-        data <- merge(data, res[[df]])
-      }
-    }
-    
-    time <- as.POSIXct(data[,1])
-    
-    data <- data.frame(as.numeric(t(as.matrix(data[,-1]))))
-    
-    colnames(data) <- tail(names(obs[[1]]@result),1)
-    
-    return(STFDF(sp, time, data))
-  } else {
-    data <- sapply(res, as.numeric)
-    time <- as.POSIXct(obs$observationData@phenomenonTime@timePosition@time, tz="GMT")
-    data <- as.data.frame(data)
-    
-    colnames(data) <- obs$observationData@observedProperty@href
-    
-    return(STFDF(sp, time, data, time))
-  }
-}
-
-as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
-  sp <- do.call(rbind, lapply(obs, function(x) as.Spatial.MonitoringPoint(x@featureOfInterest@feature)))
-  
-  res <- as.numeric(sapply(obs, 
-                           function(x) {
-                             res <- x@result
-                             if(is.null(res))
-                               res <- NA_character_
-                             res
-                           }))
-  sp <- addAttrToGeom(sp, data.frame(obs=res))
-  colnames(sp@data) <- obs[[1]]@observedProperty@href
-  return(sp)
-}
-
 # updateStatus("Requesting SOS")
 
 ## tamis
-library(sos4R)
+library(httr)
+library(rjson)
+library(sp)
 library(spacetime)
 library(gstat)
 library(rgdal)
+library(RCurl)
+
+readTSdata <- function(ts_URI, timespan, .opts, ...) {
+  if(!missing(.opts))
+    meta <- GET(ts_URI, do.call(config, .opts), ...)
+  else
+    meta <- GET(ts_URI)
+  
+  meta <- memDecompress(meta$content, "none", asChar = T)
+  meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
+  meta <- fromJSON(meta)
+  
+  if(!missing(.opts))
+    ts <- GET(paste(ts_URI, "/getData?timespan=", timespan, sep=""), do.call(config, .opts), ...)
+  else 
+    ts <- GET(paste(ts_URI, "/getData?timespan=", timespan, sep=""))
+  
+  ts <- memDecompress(ts$content, "none", asChar = T)
+  ts <- substr(ts, gregexpr("\"values", ts)[[1]][1]-1, nchar(ts))
+  ts <- fromJSON(ts)
+  
+  ts <- do.call(rbind, ts$values)
+  ts <- data.frame(time = as.POSIXct(as.numeric(ts[,1])/1e3, origin="1970-01-01"),
+                   val = unlist(ts[,2]))
+  
+  if(!is.null(meta$parameters$phenomenon$label))
+    colnames(ts)[2] <- meta$parameters$phenomenon$label  
+  
+  coords <- matrix(as.numeric(unlist(meta$station$geometry$coordinates)), nrow=1)
+  coords <- coords[,!is.nan(coords) & !is.na(coords), drop=F]
+  
+  if (length(ts[,1]) == 1)
+    return(STFDF(SpatialPoints(coords), ts[,1], ts[,-1,drop=F], ts[,1]))
+  STFDF(SpatialPoints(coords), ts[,1], ts[,-1,drop=F])
+}
+
+readTSmeta <- function(ts_URI, .opts, ...) {
+  if(!missing(.opts))
+    meta <- GET(ts_URI, do.call(config, .opts), ...)
+  else
+    meta <- GET(ts_URI, ...)
+  meta <- memDecompress(meta$content, "none", asChar = T)
+  meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
+  fromJSON(meta)
+}
+
+###
 
 source("~/52North/secOpts.R")
 
 # wps.off;
-# 2016-02
-sosInputData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-02-01T00:00:00.00Z%2F2016-02-29T23:59:00.00Z"
-# 2016-01-01
-# sosInputData <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T23:59:00.00Z"
+timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469"
+timespan <-  "2016-01-01T/2016-01-14TZ"
+target <- "geotiff.tiff" 
 # wps.on;
 
-SOSreqBreakup <- function(sosReq) {
-  parList <- NULL
-  parList$observedProperty <- list(sosReq[[match("observedProperty", sapply(sosReq, function(x) x[1]))]][2])
-  parList$proc <- sosReq[[match("procedure", sapply(sosReq, function(x) x[1]))]][2]
-  FOIid <- match("featureOfInterest", sapply(sosReq, function(x) x[1]))
-  if(!is.na(FOIid))
-    parList$featureOfInterest <- sosReq[[match("featureOfInterest", sapply(sosReq, function(x) x[1]))]][2]
-  parList$responseFormat  <- sosReq[[match("responseformat", sapply(sosReq, function(x) x[1]))]][2]
-  parList$eventTime <- sosReq[[match("temporalFilter", sapply(sosReq, function(x) x[1]))]][2]
-  
-  return(parList)
-}
-sosInputData <- gsub("%3D","=", sosInputData)#=-signs must always be escaped using WPS4R 
-sosInputData <- gsub("&amp;","&", sosInputData)#ampersands might be encoded
-sosInputData <- gsub("req_quest","request", sosInputData)#request will be replaced by req_est after sent to Rserve
-sosInputData <- gsub("s_system","system", sosInputData)#request will be replaced by req_est after sent to Rserve TODO: check other filtered strings
+isGrid <- FALSE
 
-dataBreakUp <- strsplit(sosInputData,split = "?", fixed = T)[[1]]
-dataURL <- dataBreakUp[1] 
+fileType <- tail(strsplit(target,split =  ".", fixed = T)[[1]],1)
 
-dataBreakUp <- lapply(strsplit(dataBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
-dataVersion <- dataBreakUp[[match("version", sapply(dataBreakUp, function(x) x[1]))]][2]
-
-obsProp <- dataBreakUp[[which(sapply(dataBreakUp, function(x) x[1]) == "observedProperty")]][2] 
-
-parList <- SOSreqBreakup(dataBreakUp)
-
-source("~/52North/secOpts.R")
-TaMIS_SOS <- SOS(url = dataURL,
-                 version = dataVersion, binding = "KVP", curlOptions = .opts)
-
-parList$sos <- TaMIS_SOS
-
-if (length(strsplit(parList$eventTime, split = "%2F")[[1]]) == 1) {
-# add temporal buffer +/- 1 day and 5 minutes
-  parList$eventTime <- paste("om%3AphenomenonTime%2C",
-                             paste(as.character(as.POSIXct(strsplit(parList$eventTime, "%2C")[[1]][2], 
-                                                           format="%Y-%m-%dT%H:%M:%S") + c(-24*3600-300,24*3600+300),
-                                                format="%Y-%m-%dT%H:%M:%S"), collapse = "%2F"),
-                             sep="")
+if (fileType == "tiff" | fileType == "tif") {
+  isGrid <-TRUE
+  target <- readGDAL(target)
+  target <- as(target,"SpatialPointsDataFrame")
+} else {
+  library(rgeos)
+  target <- readWKT(target)
 }
 
-if(is.null(parList$offering)) {
-  TaMIS_offs <- sosOfferings(TaMIS_SOS)
-  fstOccur <- max(which(sapply(TaMIS_offs, function(x) any(x@observableProperty == parList$observedProperty[[1]]))))
-  parList$offering <- names(TaMIS_offs)[fstOccur]
+#
+
+timeseries <- strsplit(timeseries, split = " ", fixed = T)[[1]]
+timeseries <- timeseries[nchar(timeseries) > 0]
+
+dataObs_STFDF <- NULL
+for (ts in timeseries) { # ts <- timeseries[1]
+  source <- readTSdata(ts, timespan, .opts)
+  if(is.null(dataObs_STFDF)) {
+    dataObs_STFDF <- source
+    next;
+  }
+  dataObs_STFDF <- rbind(dataObs_STFDF, source)
 }
 
-# updateStatus("Requested SOS successfully")
+dataObs_STFDF@sp@proj4string <- CRS("+init=epsg:4326")
 
-# parList$verbose <- TRUE
+# targetVarMeta <- readTSmeta(timeseries_Zielvariable, .opts)  
 
-dataObs <- do.call(getObservation, parList)
+# updateStatus("Requested Data successfully")
 
-# updateStatus("Requested observedproperty observations successfully")
-
-dataObs_STFDF <- as.STFDF.list.Om_OMObservation(dataObs)
-
-# debugonce(as.STFDF.list.Om_OMObservation)
+n.time <- length(dataObs_STFDF@time)
 
 dataPos <- "dataPos.png"
 png(file = dataPos)
-tmpDataPos <- plot(dataObs_STFDF@sp)
+tmpDataPos <- stplot(dataObs_STFDF[,1:min(6, n.time)])
 print(tmpDataPos)
 graphics.off()
 
 # wps.out: dataPos, png;
 
-library(gstat)
-
-n.time <- length(dataObs_STFDF@time)
-
-empVgm <- variogram(Schuettmenge ~ 1, dataObs_STFDF, tlags=0)
+empVgm <- variogram(Schüttmenge ~ 1, dataObs_STFDF, tlags=0)
 empVgm <- empVgm[-1,]
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
@@ -206,24 +146,7 @@ print(tmpPlot)
 graphics.off()
 # wps.out: vgmFit, png;
 
-# # updateStatus("Fitted variogram")
-
-# wps.off;
-target <- "geotiff.tiff"
-# wps.on;
-
-isGrid <- FALSE
-
-fileType <- tail(strsplit(target,split =  ".", fixed = T)[[1]],1)
-
-if (fileType == "tiff" | fileType == "tif") {
-  isGrid <-TRUE
-  target <- readGDAL(target)
-  target <- as(target,"SpatialPointsDataFrame")
-} else {
-  library(rgeos)
-  target <- readWKT(target)
-}
+# updateStatus("Fitted/selected variogram")
 
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 colnames(dataObs_STFDF@sp@coords) <- c("x","y")
@@ -233,13 +156,13 @@ targetVar <- NULL
 
 if (n.time >= 10) {
   for (day in 1:n.time) {
-    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
+    pred <- krige(Schüttmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
     targetData <- cbind(targetData, pred$var1.pred)
     targetVar <- cbind(targetVar, pred$var1.var)
   }
 } else {
   for (day in 1:n.time) {
-    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
+    pred <- krige(Schüttmenge ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
     targetData <- cbind(targetData, pred$var1.pred)
     targetVar <- cbind(targetVar, pred$var1.var)
   }
@@ -338,6 +261,8 @@ if(isGrid) {
   att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", "EPSG:31466")
   att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", "+proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs")
   
+  obsProp <- colnames(dataObs_STFDF@data)[1]
+  
   var.def.nc(nc, obsProp, "NC_DOUBLE", NA)
   att.put.nc(nc, obsProp, "ancillary_variables", "NC_CHAR", "var1pred var1var")
   att.put.nc(nc, obsProp, "ref", "NC_CHAR", "http://www.uncertml.org/distributions/normal")
@@ -365,8 +290,6 @@ if(isGrid) {
   close.nc(nc)
 }
 # wps.out: ncFile, netcdf;
-
-stplot(target_STFDF[,,"var1.pred"])
 
 # wps.off;
 targetSOS <- NA # "https://tamis.dev.52north.org/sos/service"
