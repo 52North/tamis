@@ -12,6 +12,9 @@
 # abstract = geotiff defining the interpolation grid (only non NAs will be interpolated);
 
 ## tamis
+
+# updateStatus("Loading libraries")
+
 library(httr)
 library(rjson)
 library(sp)
@@ -19,6 +22,8 @@ library(spacetime)
 library(gstat)
 library(rgdal)
 library(RCurl)
+
+# updateStatus("helper functions")
 
 readTSdata <- function(ts_URI, timespan, .opts, ...) {
   if(!missing(.opts))
@@ -66,14 +71,16 @@ readTSmeta <- function(ts_URI, .opts, ...) {
 
 ###
 
-# updateStatus("Requesting data")
+# updateStatus("Loading secOpts")
 
 source("~/52North/secOpts.R")
 
 # wps.off;
+
 timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469"
 timespan <-  "2016-01-01T/2016-01-14TZ"
 target <- "geotiff.tiff" 
+
 # wps.on;
 
 isGrid <- FALSE
@@ -92,6 +99,8 @@ if (fileType == "tiff" | fileType == "tif") {
 timeseries <- strsplit(timeseries, split = " ", fixed = T)[[1]]
 timeseries <- timeseries[nchar(timeseries) > 0]
 
+# updateStatus("loading TS data")
+
 dataObs_STFDF <- NULL
 for (ts in timeseries) { # ts <- timeseries[1]
   source <- readTSdata(ts, timespan, .opts)
@@ -101,6 +110,8 @@ for (ts in timeseries) { # ts <- timeseries[1]
   }
   dataObs_STFDF <- rbind(dataObs_STFDF, source)
 }
+
+# updateStatus("Setting CRS")
 
 dataObs_STFDF@sp@proj4string <- CRS("+init=epsg:4326")
 
@@ -115,6 +126,8 @@ print(tmpDataPos)
 graphics.off()
 
 # wps.out: dataPos, png;
+
+# updateStatus("Calculate empirical variogram")
 
 empVgm <- variogram(Schüttmenge ~ 1, dataObs_STFDF, tlags=0)
 empVgm <- empVgm[-1,]
@@ -137,7 +150,7 @@ print(tmpPlot)
 graphics.off()
 # wps.out: vgmFit, png;
 
-# updateStatus("Fitted or selected variogram")
+# updateStatus("Plot fitted or selected variogram")
 
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 colnames(dataObs_STFDF@sp@coords) <- c("x","y")
@@ -158,6 +171,8 @@ if (n.time >= 10) {
     targetVar <- cbind(targetVar, pred$var1.var)
   }
 }
+
+# updateStatus("Interpolated data")
 
 target <- addAttrToGeom(geometry(target), as.data.frame(cbind(targetData, targetVar)))
 

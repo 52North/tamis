@@ -25,7 +25,7 @@ timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
-#wps.on;
+# wps.on;
 
 library(RCurl)
 library(httr)
