@@ -1,7 +1,5 @@
 # wps.des: tamis-rest-interpolation, title = Interpolation of Schüttmenge at Bevertalsperre;
 
-# POST oder GETrequests, wie werden die dAten geliefert?
-
 # wps.in: timeseries, string, set of TS URIs, whitespace " " seperated, 
 # abstract = timeseries URI as datasource,
 # value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469";
@@ -12,11 +10,6 @@
 
 # wps.in: target, type = geotiff, 
 # abstract = geotiff defining the interpolation grid (only non NAs will be interpolated);
-
-# wps.in: targetSOS, string, SOS, 
-# abstract = target SOS-URL for the output;
-
-# updateStatus("Requesting SOS")
 
 ## tamis
 library(httr)
@@ -73,6 +66,8 @@ readTSmeta <- function(ts_URI, .opts, ...) {
 
 ###
 
+# updateStatus("Requesting data")
+
 source("~/52North/secOpts.R")
 
 # wps.off;
@@ -93,8 +88,6 @@ if (fileType == "tiff" | fileType == "tif") {
   library(rgeos)
   target <- readWKT(target)
 }
-
-#
 
 timeseries <- strsplit(timeseries, split = " ", fixed = T)[[1]]
 timeseries <- timeseries[nchar(timeseries) > 0]
@@ -144,7 +137,7 @@ print(tmpPlot)
 graphics.off()
 # wps.out: vgmFit, png;
 
-# updateStatus("Fitted/selected variogram")
+# updateStatus("Fitted or selected variogram")
 
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 colnames(dataObs_STFDF@sp@coords) <- c("x","y")
@@ -214,12 +207,6 @@ if(isGrid) {
   library(RNetCDF)
   ncFile <- "targetnetcdf.nc"
   
-  # ncBioTemp <- open.nc("biotemperature_normalDistr.nc")
-  # att.inq.nc(ncBioTemp,
-  #            ,)
-  #            
-  # RNetCDF::file.inq.nc(ncBioTemp)
-  # 
   nc <- create.nc(ncFile, prefill = FALSE)
   
   # x
@@ -288,7 +275,3 @@ if(isGrid) {
   close.nc(nc)
 }
 # wps.out: ncFile, netcdf;
-
-# wps.off;
-targetSOS <- NA # "https://tamis.dev.52north.org/sos/service"
-# wps.on;

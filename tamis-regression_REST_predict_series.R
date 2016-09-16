@@ -10,7 +10,7 @@
 
 # wps.in: timeseriesZielvariable, string, TS URI, 
 # abstract = timeseries URI for the target variable,
-# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/513";
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451";
 
 # wps.in: timespan, string, timespan of reference period, 
 # abstract = timeseries URI for the target variable,
