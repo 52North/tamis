@@ -1,14 +1,14 @@
 # wps.des: tamis-rest-fill-series, title = TaMIS Prediction Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
 
-# wps.in: timeseries_Niederschlag, string, TS URI, 
+# wps.in: timeseriesNiederschlag, string, TS URI, 
 # abstract = timeseries Id for Niederschlag,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/427";
 
-# wps.in: timeseries_Fuellstand, string, TS URI, 
+# wps.in: timeseriesFuellstand, string, TS URI, 
 # abstract = timeseries URI for Fuellstand,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
-# wps.in: timeseries_Zielvariable, string, TS URI, 
+# wps.in: timeseriesZielvariable, string, TS URI, 
 # abstract = timeseries URI for the target variable,
 # value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/513";
 
@@ -19,10 +19,10 @@
 #################################
 
 # wps.off;
-timeseries_Niederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
-timeseries_Fuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
+timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
+timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseries_Zielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
+timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
 #wps.on;
@@ -63,6 +63,8 @@ readTSdata <- function(ts_URI, timespan, .opts, ...) {
   coords <- matrix(as.numeric(unlist(meta$station$geometry$coordinates)), nrow=1)
   coords <- coords[,!is.nan(coords) & !is.na(coords), drop=F]
   
+  if (length(ts[,1]) == 1)
+    return(STFDF(SpatialPoints(coords), ts[,1], ts[,-1,drop=F], ts[,1]))
   STFDF(SpatialPoints(coords), ts[,1], ts[,-1,drop=F])
 }
 
@@ -78,13 +80,13 @@ readTSmeta <- function(ts_URI, .opts, ...) {
 
 source("~/52North/secOpts.R")
 
-precip <- readTSdata(timeseries_Niederschlag, timespan)
-fillLevel <- readTSdata(timeseries_Fuellstand, timespan)
-targetVar <- readTSdata(ts_URI = timeseries_Zielvariable, timespan, .opts)
+precip <- readTSdata(timeseriesNiederschlag, timespan)
+fillLevel <- readTSdata(timeseriesFuellstand, timespan)
+targetVar <- readTSdata(ts_URI = timeseriesZielvariable, timespan, .opts)
 
-precipMeta <- readTSmeta(timeseries_Niederschlag)
-fillLevelMeta <- readTSmeta(timeseries_Fuellstand)
-targetVarMeta <- readTSmeta(timeseries_Zielvariable, .opts)
+precipMeta <- readTSmeta(timeseriesNiederschlag)
+fillLevelMeta <- readTSmeta(timeseriesFuellstand)
+targetVarMeta <- readTSmeta(timeseriesZielvariable, .opts)
 
 # synchronise data sets
 # 
@@ -128,7 +130,7 @@ df <- df[apply(df,1, function(x) !any(is.na(x[c("precip", "fillLevel")]))),]
 
 if (sum(!is.na(df$targetVar)) < 10) {
   load("preDefTSModel.RData")
-  lmMod <- switch(tail(strsplit(timeseries_Zielvariable,"/", fixed=T)[[1]],1),
+  lmMod <- switch(tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1),
                   '194' = mod194,
                   stop("No model present, use longer time series to fit one."))
 } else {

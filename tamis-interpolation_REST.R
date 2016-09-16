@@ -111,8 +111,6 @@ for (ts in timeseries) { # ts <- timeseries[1]
 
 dataObs_STFDF@sp@proj4string <- CRS("+init=epsg:4326")
 
-# targetVarMeta <- readTSmeta(timeseries_Zielvariable, .opts)  
-
 # updateStatus("Requested Data successfully")
 
 n.time <- length(dataObs_STFDF@time)

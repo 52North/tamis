@@ -1,14 +1,14 @@
 # wps.des: tamis-rest-prediction-single, title = TaMIS Prediction Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
 
-# wps.in: timeseries_Niederschlag, string, TS URI, 
+# wps.in: timeseriesNiederschlag, string, TS URI, 
 # abstract = timeseries Id for Niederschlag,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/427";
 
-# wps.in: timeseries_Fuellstand, string, TS URI, 
+# wps.in: timeseriesFuellstand, string, TS URI, 
 # abstract = timeseries Id for Fuellstand,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
-# wps.in: timeseries_Zielvariable, string, TS URI, 
+# wps.in: timeseriesZielvariable, string, TS URI, 
 # abstract = timeseries Id for the target variable,
 # value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/513";
 
@@ -16,31 +16,31 @@
 # abstract = timeseries Id for the target variable,
 # value = "2016-01-01T/2016-02-29TZ";
 
-# wps.in: singleInput_Niederschlag, integer, single value, 
+# wps.in: singleInputNiederschlag, integer, single value, 
 # abstract = single value for prediction values: Niederschlag,
 # value = 145;
 
-# wps.in: singleInput_Fuellstand, integer, single value, 
+# wps.in: singleInputFuellstand, integer, single value, 
 # abstract = single value for prediction values: Fuellstand,
 # value = 292;
 
-# wps.in: singleInput_Zeitstempel, string, prediction time stamp, 
+# wps.in: singleInputZeitstempel, string, prediction time stamp, 
 # abstract = single timestamp for which the prediction shall be made,
 # value = "2016-03-03T14:00:00Z";
 
 #################################
 
 # wps.off;
-timeseries_Niederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
-timeseries_Fuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
+timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
+timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseries_Zielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
+timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
 
-singleInput_Niederschlag <- 100
-singleInput_Fuellstand <- 290
-singleInput_Zeitstempel <- "2016-03-03T14:00:00Z"
+singleInputNiederschlag <- 100
+singleInputFuellstand <- 290
+singleInputZeitstempel <- "2016-03-03T14:00:00Z"
 #wps.on;
 
 # wps.import: tamis-regression-common.R;
@@ -61,17 +61,17 @@ source("tamis-regression-common.R")
 
 # hourly 
 lstTSDf <- tail(df,1)
-singleInput_Zeitstempel <- as.POSIXct(singleInput_Zeitstempel,
+singleInputZeitstempel <- as.POSIXct(singleInputZeitstempel,
                                       format="%Y-%m-%dT%H:%M:%SZ")
-diffHours <- ceiling((as.numeric(singleInput_Zeitstempel) - as.numeric(lstTSDf$time))/3600)
-diffFillLevel <- singleInput_Fuellstand - lstTSDf$fillLevel
+diffHours <- ceiling((as.numeric(singleInputZeitstempel) - as.numeric(lstTSDf$time))/3600)
+diffFillLevel <- singleInputFuellstand - lstTSDf$fillLevel
 
 dissAggFun <- function(x) ifelse(x < 1/3, 6*x, 3 - 3*x)
 
-reSum <- sum(dissAggFun(0:diffHours/diffHours)*singleInput_Niederschlag/diffHours)
+reSum <- sum(dissAggFun(0:diffHours/diffHours)*singleInputNiederschlag/diffHours)
 
-predDf <- data.frame(time=singleInput_Zeitstempel - diffHours:0*3600)
-predDf$precip <- dissAggFun(0:diffHours/diffHours)*singleInput_Niederschlag/diffHours*singleInput_Niederschlag/reSum 
+predDf <- data.frame(time=singleInputZeitstempel - diffHours:0*3600)
+predDf$precip <- dissAggFun(0:diffHours/diffHours)*singleInputNiederschlag/diffHours*singleInputNiederschlag/reSum 
 predDf$fillLevel <- lstTSDf$fillLevel + 0:diffHours*diffFillLevel/diffHours
 
 predDf$predVar <- predict(lmMod, predDf)

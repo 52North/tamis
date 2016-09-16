@@ -12,3 +12,4 @@ biotemperature_randomSamples.nc
 no2_conc_rotterdam_20110418.nc
 temp*
 *.json
+modelPrediction.csv

@@ -10,16 +10,6 @@
 # wps.in: targetSOS, string, SOS, 
 # abstract = target SOS-URL for the output;
 
-#   <ows:Title>Plot of the target observations</ows:Title>
-#   <ows:Identifier>targetObs_plot</ows:Identifier>
-#   <ows:Title>Diagrams with model parameters</ows:Title>
-#   <ows:Identifier>model_diagnostics</ows:Identifier>
-#   <ows:Title>Relations between observed properties</ows:Title>
-#   <ows:Identifier>relations</ows:Identifier>
-#   <ows:Title>Interpolated Values</ows:Title>
-#   <ows:Identifier>interpolated-values</ows:Identifier>                           
-
-
 as.Spatial.MonitoringPoint <- function(obj, ...) {
   
   .extractCRS <- function(obj) {

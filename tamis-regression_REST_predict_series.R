@@ -1,14 +1,14 @@
 # wps.des: tamis-rest-prediction-series, title = TaMIS Prediction Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
 
-# wps.in: timeseries_Niederschlag, string, TS URI, 
+# wps.in: timeseriesNiederschlag, string, TS URI, 
 # abstract = timeseries Id for Niederschlag,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/427";
 
-# wps.in: timeseries_Fuellstand, string, TS URI, 
+# wps.in: timeseriesFuellstand, string, TS URI, 
 # abstract = timeseries URI for Fuellstand,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
-# wps.in: timeseries_Zielvariable, string, TS URI, 
+# wps.in: timeseriesZielvariable, string, TS URI, 
 # abstract = timeseries URI for the target variable,
 # value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/513";
 
@@ -16,25 +16,25 @@
 # abstract = timeseries URI for the target variable,
 # value = "2016-01-01T/2016-02-29TZ";
 
-# wps.in: timeseries_predict_Niederschlag, string, TS URI, 
+# wps.in: timeseriesPredictNiederschlag, string, TS URI, 
 # abstract = timeseries URI for prediction values: Niederschlag,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/427";
 
-# wps.in: timeseries_predict_Fuellstand, string, TS URI, 
+# wps.in: timeseriesPredictFuellstand, string, TS URI, 
 # abstract = timeseries URI for prediction values: Fuellstand,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
-# wps.in: timespan_predict, string, prediction time stamp, 
+# wps.in: timespanpPredict, string, prediction time stamp, 
 # abstract = timestamp for which the prediction shall be made,
 # value = "2016-03-01T/2016-03-31TZ";
 
 #################################
 
 # wps.off;
-timeseries_Niederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
-timeseries_Fuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
+timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
+timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseries_Zielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
+timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
 #wps.on;
@@ -47,7 +47,7 @@ source("tamis-regression-common.R")
 
 # wps.on;
 
-# wps.out: model_diagnostics, png;
+# wps.out: modelDiagnostics, png;
 
 # wps.out: relations, png;
 
@@ -57,20 +57,20 @@ source("tamis-regression-common.R")
 
 
 # wps.off;
-timeseries_predict_Niederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
-timeseries_predict_Fuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
+timeseriesPredictNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
+timeseriesPredictFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timespan_predict <- "2016-03-01T/2016-03-31TZ"
+timespanPredict <- "2016-03-01T/2016-03-31TZ"
 #wps.on;
 
 
-precip <- readTSdata(timeseries_Niederschlag, timespan_predict)
-fillLevel <- readTSdata(timeseries_Fuellstand, timespan_predict)
-targetVar <- readTSdata(timeseries_Zielvariable, timespan_predict, .opts)
+precip <- readTSdata(timeseriesNiederschlag, timespanPredict)
+fillLevel <- readTSdata(timeseriesFuellstand, timespanPredict)
+targetVar <- readTSdata(timeseriesZielvariable, timespanPredict, .opts)
 
-precipMeta <- readTSmeta(timeseries_Niederschlag)
-fillLevelMeta <- readTSmeta(timeseries_Fuellstand)
-targetVarMeta <- readTSmeta(timeseries_Zielvariable, .opts)
+precipMeta <- readTSmeta(timeseriesNiederschlag)
+fillLevelMeta <- readTSmeta(timeseriesFuellstand)
+targetVarMeta <- readTSmeta(timeseriesZielvariable, .opts)
 # synchronise data sets
 
 #precipitation
@@ -101,10 +101,10 @@ predDf <- df[apply(df,1, function(x) !any(is.na(x))),]
 
 predDf$predVar <- predict(lmMod, predDf)
 
-model_prediction <- "model_prediction.csv"
-write.csv(predDf, file = model_prediction)
+modelPrediction <- "modelPrediction.csv"
+write.csv(predDf, file = modelPrediction)
 
-# wps.out: model_prediction, csv;
+# wps.out: modelPrediction, csv;
 
 ##### json
 

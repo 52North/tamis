@@ -36,6 +36,8 @@ readTSdata <- function(ts_URI, timespan, .opts, ...) {
   coords <- matrix(as.numeric(unlist(meta$station$geometry$coordinates)), nrow=1)
   coords <- coords[,!is.nan(coords) & !is.na(coords), drop=F]
   
+  if (length(ts[,1]) == 1)
+    return(STFDF(SpatialPoints(coords), ts[,1], ts[,-1,drop=F], ts[,1]))
   STFDF(SpatialPoints(coords), ts[,1], ts[,-1,drop=F])
 }
 
@@ -51,13 +53,13 @@ readTSmeta <- function(ts_URI, .opts, ...) {
 
 source("~/52North/secOpts.R")
 
-precip <- readTSdata(timeseries_Niederschlag, timespan)
-fillLevel <- readTSdata(timeseries_Fuellstand, timespan)
-targetVar <- readTSdata(ts_URI = timeseries_Zielvariable, timespan, .opts)
+precip <- readTSdata(timeseriesNiederschlag, timespan)
+fillLevel <- readTSdata(timeseriesFuellstand, timespan)
+targetVar <- readTSdata(ts_URI = timeseriesZielvariable, timespan, .opts)
 
-precipMeta <- readTSmeta(timeseries_Niederschlag)
-fillLevelMeta <- readTSmeta(timeseries_Fuellstand)
-targetVarMeta <- readTSmeta(timeseries_Zielvariable, .opts)
+precipMeta <- readTSmeta(timeseriesNiederschlag)
+fillLevelMeta <- readTSmeta(timeseriesFuellstand)
+targetVarMeta <- readTSmeta(timeseriesZielvariable, .opts)
 
 # synchronise data sets
 
@@ -100,7 +102,7 @@ df <- df[apply(df,1, function(x) !any(is.na(x))),]
 
 if (nrow(df) < 10) {
   load("preDefTSModel.RData")
-  lmMod <- switch(tail(strsplit(timeseries_Zielvariable,"/", fixed=T)[[1]],1),
+  lmMod <- switch(tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1),
                   '194' = mod194,
                   stop("No model present, use longer time series to fit one."))
 } else {
