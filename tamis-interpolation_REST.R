@@ -4,7 +4,7 @@
 
 # wps.in: timeseries, string, set of TS URIs, whitespace " " seperated, 
 # abstract = timeseries URI as datasource,
-# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469"
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469";
 
 # wps.in: timespan, string, timespan of input data, 
 # abstract = timeseries URI for the interpolation variable,
