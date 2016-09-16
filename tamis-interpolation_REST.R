@@ -1,7 +1,7 @@
-# wps.des: tamis-rest-interpolation, title = Interpolation of Schüttmenge at Bevertalsperre;
+# wps.des: tamis-rest-interpolation, title = Interpolation of Schuettmenge at Bevertalsperre;
 
 # wps.in: timeseries, string, set of TS URIs, whitespace " " seperated, 
-# abstract = timeseries URI as datasource,
+# abstract = timeseries URI as data source,
 # value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469";
 
 # wps.in: timespan, string, timespan of input data, 
@@ -9,7 +9,8 @@
 # value = "2016-01-01T/2016-01-07TZ";
 
 # wps.in: target, type = geotiff, 
-# abstract = geotiff defining the interpolation grid (only non NAs will be interpolated);
+# abstract = geotiff defining the interpolation grid (only non NAs will be interpolated),
+# value = "https://github.com/BenGraeler/tamis/raw/master/geotiff.tiff";
 
 ## tamis
 
@@ -111,6 +112,8 @@ for (ts in timeseries) { # ts <- timeseries[1]
   dataObs_STFDF <- rbind(dataObs_STFDF, source)
 }
 
+colnames(dataObs_STFDF@data) <- "Schuettmenge"
+
 # updateStatus("Setting CRS")
 
 dataObs_STFDF@sp@proj4string <- CRS("+init=epsg:4326")
@@ -129,7 +132,7 @@ graphics.off()
 
 # updateStatus("Calculate empirical variogram")
 
-empVgm <- variogram(Schüttmenge ~ 1, dataObs_STFDF, tlags=0)
+empVgm <- variogram(Schuettmenge ~ 1, dataObs_STFDF, tlags=0)
 empVgm <- empVgm[-1,]
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
@@ -160,13 +163,13 @@ targetVar <- NULL
 
 if (n.time >= 10) {
   for (day in 1:n.time) {
-    pred <- krige(Schüttmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
+    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
     targetData <- cbind(targetData, pred$var1.pred)
     targetVar <- cbind(targetVar, pred$var1.var)
   }
 } else {
   for (day in 1:n.time) {
-    pred <- krige(Schüttmenge ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
+    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
     targetData <- cbind(targetData, pred$var1.pred)
     targetVar <- cbind(targetVar, pred$var1.var)
   }
