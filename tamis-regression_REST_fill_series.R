@@ -113,7 +113,7 @@ targetVarAgg <- aggregate(targetVar[1,,drop=F]@data[[1]],
                                                     " ", fixed=T), function(x) x[1])),
                           function(x) mean(x, na.rm = T))
 colnames(targetVarAgg) <- colnames(targetVar@data)
-targetVar <- STFDF(targetVar@sp, as.POSIXct(targetVarAgg[,1]), targetVarAgg[,2,drop=F])
+targetVar <- STFDF(targetVar@sp, as.POSIXct(targetVarAgg[,1], tz = "CET"), targetVarAgg[,2,drop=F])
 
 joinTimeStamps <- unique(time(precip), time(fillLevel))
 
