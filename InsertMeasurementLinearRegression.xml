@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sos:InsertObservation 
+    xmlns:sos="http://www.opengis.net/sos/2.0"
+    xmlns:swes="http://www.opengis.net/swes/2.0"
+    xmlns:swe="http://www.opengis.net/swe/2.0"
+    xmlns:sml="http://www.opengis.net/sensorML/1.0.1"
+    xmlns:gml="http://www.opengis.net/gml/3.2"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:om="http://www.opengis.net/om/2.0"
+    xmlns:sams="http://www.opengis.net/samplingSpatial/2.0"
+    xmlns:sf="http://www.opengis.net/sampling/2.0"
+    xmlns:wml="http://www.opengis.net/waterml/2.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    service="SOS"
+    version="2.0.0"
+    xsi:schemaLocation="http://www.opengis.net/sos/2.0 http://schemas.opengis.net/sos/2.0/sos.xsd         
+    http://www.opengis.net/samplingSpatial/2.0 http://schemas.opengis.net/samplingSpatial/2.0/spatialSamplingFeature.xsd">
+    <sos:offering>key:offering</sos:offering>
+    <sos:observation>
+        <om:OM_Observation gml:id="o2">
+            <gml:description>key:description</gml:description>
+            <gml:identifier codeSpace="">key:identifier</gml:identifier>
+            <om:type xlink:href="http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"/>
+            <om:phenomenonTime>
+                <gml:TimeInstant gml:id="phenomenonTime">
+                    <gml:timePosition>2012-07-31T17:45:15.000+00:00</gml:timePosition>
+                </gml:TimeInstant>
+            </om:phenomenonTime>
+            <om:resultTime>
+               <gml:TimeInstant gml:id="resulTime">
+                    <gml:timePosition>key:resultTime</gml:timePosition>
+                </gml:TimeInstant>
+            </om:resultTime>
+            <om:procedure xlink:href=key:procedure/>
+            <om:observedProperty xlink:href=key:obsProp/>
+            <om:featureOfInterest>
+                <sams:SF_SpatialSamplingFeature  gml:id=key:wml:gml:id>
+                    <gml:identifier codeSpace="">key:gml:identifier</gml:identifier>
+                    <sf:type xlink:href="http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint"/>
+                    <sf:sampledFeature xlink:href=key:sf/>
+                    <sams:shape>
+                        <gml:Point gml:id=key:point:gml:id>
+                            <gml:pos srsName="http://www.opengis.net/def/crs/EPSG/0/4326">51.935101100104916 7.651968812254194</gml:pos>
+                        </gml:Point>
+                    </sams:shape>
+                </sams:SF_SpatialSamplingFeature>
+            </om:featureOfInterest>
+            <om:result xsi:type="gml:MeasureType" uom="test_unit_9_3">0.28</om:result>
+        </om:OM_Observation>
+    </sos:observation>
+</sos:InsertObservation>

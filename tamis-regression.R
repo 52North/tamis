@@ -58,22 +58,34 @@ as.STFDF.list.Om_OMObservation <- function (obs) {
     ids <- ids[-dropIds]
   }
     
-  data <- res[[1]]
-  colnames(data)[-1] <- ids[[1]]
-  if(length(res)>1) {
-    for (df in 2:length(res)) {
-      colnames(res[[df]])[-1] <- ids[[df]]
-      
-      data <- merge(data, res[[df]])
+  data <- as.data.frame(res[[1]])
+  if (ncol(data) > 1) {
+    colnames(data)[-1] <- ids[[1]]
+    if(length(res)>1) {
+      for (df in 2:length(res)) {
+        colnames(res[[df]])[-1] <- ids[[df]]
+        
+        data <- merge(data, res[[df]])
+      }
     }
+    
+    # check for NAs in time column (daylight saving time artefacts)
+    data <- data[!is.na(data[,1]),]
+    
+    time <- as.POSIXct(data[,1])
+    
+    data <- data.frame(as.numeric(t(as.matrix(data[,-1]))))
+    colnames(data) <- tail(names(obs[[1]]@result),1)
+    
+    ret <- STFDF(sp, time, data)
+  } else {
+    time <- do.call(c, lapply(obs, function(x) (x@phenomenonTime@timePosition@time)))
+    data <- data.frame(do.call(c, res))
+    ret <- STIDF(sp, time, data)
+    ret <- as(ret,"STFDF")
   }
   
-  time <- as.POSIXct(data[,1])
-  
-  data <- data.frame(as.numeric(t(as.matrix(data[,-1]))))
-  colnames(data) <- tail(names(obs[[1]]@result),1)
-  
-  STFDF(sp, time, data)
+  ret
 }
 
 as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
@@ -91,22 +103,48 @@ as.SpatialPointsDataFrame.list.OmOM_Observation <- function (obs) {
   return(sp)
 }
 
+SOSreqBreakup <- function(sosReq) {
+  observedproperty <- sosReq[[match("observedProperty", sapply(sosReq, function(x) x[1]))]][2]
+  proc <- sosReq[[match("procedure", sapply(sosReq, function(x) x[1]))]][2]
+  featureOfInterest <- sosReq[[match("featureOfInterest", sapply(sosReq, function(x) x[1]))]][2]
+  responseFormat  <- sosReq[[match("responseformat", sapply(sosReq, function(x) x[1]))]][2]
+  eventTime <- sosReq[[match("temporalFilter", sapply(sosReq, function(x) x[1]))]][2]
+  
+  return(list(procedure = proc,
+              featureOfInterest = SosFeatureOfInterest(list(featureOfInterest)),
+              observedProperty = list(observedproperty),
+              eventTime = eventTime, 
+              responseFormat = responseFormat))
+}
+
+########### Script
 ## 
 # updateStatus("Requesting SOS")
+
+# TerraTransfer:
+# http://tamis-sos.de:8080/52n-sos/service
 
 # wps.off;
 sosInputNiederschlag <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Niederschlagshoehe&procedure=Tagessumme&featureOfInterest=Bever-Talsperre&&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
 sosInputFuellstand <- "http://www.fluggs.de/sos2/sos?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Speicherfuellstand&procedure=Einzelwert&featureOfInterest=Bever-Talsperre_Windenhaus&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 
-sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA7_Piezometer_Kalkzone&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpati-al%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
+# TT:
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10006&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10013&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10014&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10015&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+# sosInputTarget <- "http://tamis-sos.de:8080/52n-sos/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=http://www.52north.org/test/observableProperty/waterLevel&procedure=WaterLevelE10019&featureOfInterest=water%20level%20sensor&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:00:01.00Z%2F2016-06-30T23:59:59.000Z&mergeObservationsIntoDataArray=true"
+
+# WV: 
+sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Wasserstand_im_Damm&procedure=Handeingabe&featureOfInterest=Bever-Talsperre_MQA3_Piezometer_Luftseite&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2016-01-01T00:01:00.00Z%2F2016-04-30T23:59:00.000Z"
 # Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper
 # Bever-Talsperre_MQA3_Piezometer_Luftseite
 # Bever-Talsperre_MQA4_Piezometer_Luftseite
 # Bever-Talsperre_MQA5_Piezometer_Berme
 # Bever-Talsperre_MQA7_Piezometer_Kalkzone
 
-# sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&featureOfInterest=Bever-Talsperre_Sickerwassermessstelle_S2B&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
+# sosInputTarget <- "http://fluggs.wupperverband.de/sos2-tamis/service?service=SOS&version=2.0.0&request=GetObservation&responseformat=http://www.opengis.net/om/2.0&observedProperty=Schuettmenge&procedure=Tageswert_Prozessleitsystem&featureOfInterest=Bever-Talsperre_Sickerwassermessstelle_S2A&namespaces=xmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter=om%3AphenomenonTime%2C2015-01-01T10:00:00.00Z%2F2016-04-30T23:59:00.000Z"
 # Bever-Talsperre_Sickerwassermessstelle_S2A
 # Bever-Talsperre_Sickerwassermessstelle_S2B
 
@@ -118,6 +156,15 @@ singleInputNiederschlagPred <- NA # 10
 
 singleInputFuellstandPred <- NA # 293
 # wps.on;
+
+TT <- FALSE
+if (substr(sosInputTarget, 8, 19) == "tamis-sos.de")
+  TT <- TRUE
+
+WV <- FALSE
+if (substr(sosInputTarget, 8, 30) == "fluggs.wupperverband.de")
+  WV <- TRUE
+
 
 if(is.na(sosInputNiederschlag) & is.na(sosInputNiederschlagPred) & is.na(singleInputNiederschlagPred))
   stop("At least one input type for Niederschlag must be present.")
@@ -138,24 +185,21 @@ targetBreakUp <- strsplit(sosInputTarget,split = "?", fixed = T)[[1]]
 targetURL <- targetBreakUp[1] 
 
 targetBreakUp <- lapply(strsplit(targetBreakUp[2], "&", fixed=T)[[1]], function(x) strsplit(x, "=", fixed=T)[[1]])
+names(targetBreakUp) <- sapply(targetBreakUp, function(x) x[1])
 targetVersion <- targetBreakUp[[match("version", sapply(targetBreakUp, function(x) x[1]))]][2]
 
-source("~/52North/secOpts.R")
-TaMIS_SOS <- SOS(url = targetURL,
-                 version = targetVersion, binding = "KVP", curlOptions = .opts)
+if(WV) {
+  source("~/52North/secOpts.R")
+  TaMIS_SOS <- SOS(url = targetURL,
+                   version = targetVersion, binding = "KVP", 
+                   dataFieldConverters = SosDataFieldConvertingFunctions("l/s" = sosConvertDouble),
+                   curlOptions = .opts)
+}
 
-SOSreqBreakup <- function(sosReq) {
-  observedproperty <- sosReq[[match("observedProperty", sapply(sosReq, function(x) x[1]))]][2]
-  proc <- sosReq[[match("procedure", sapply(sosReq, function(x) x[1]))]][2]
-  featureOfInterest <- sosReq[[match("featureOfInterest", sapply(sosReq, function(x) x[1]))]][2]
-  responseFormat  <- sosReq[[match("responseformat", sapply(sosReq, function(x) x[1]))]][2]
-  eventTime <- sosReq[[match("temporalFilter", sapply(sosReq, function(x) x[1]))]][2]
-
-  return(list(procedure = proc,
-              featureOfInterest = SosFeatureOfInterest(list(featureOfInterest)),
-              observedProperty = list(observedproperty),
-              eventTime = eventTime, 
-              responseFormat = responseFormat))
+if (TT) {
+  TaMIS_SOS <- SOS(url = targetURL,
+                   version = targetVersion, binding = "KVP",
+                   dataFieldConverters = SosDataFieldConvertingFunctions("mNHN" = sosConvertDouble))
 }
 
 # updateStatus("Requested SOS successfully")
@@ -164,34 +208,64 @@ SOSreqBreakup <- function(sosReq) {
 
 parList <- SOSreqBreakup(targetBreakUp)
 
+# both WV scenarios
 if(parList$observedProperty == "Wasserstand_im_Damm") {
   parList$offering <- "Zeitreihen_Handeingabe"
 }
+
 if(parList$observedProperty == "Schuettmenge") {
+  TaMIS_SOS@dataFieldConverters$'l/s' <- function (x, sos) {
+    return(as.double(x = x))}
   parList$offering <- "Zeitreihen_Tageswert_Prozessleitsystem"
 }
 
+# TT scenario
+if(substr(parList$procedure, 1, 10) == "WaterLevel") {
+  parList$offering <- paste("WaterLevelOffering", 
+                            substr(parList$procedure, 11, nchar(parList$procedure)), sep="")
+}
+
+# merge obs for TT, remove after default!
+if (TT)
+  TaMIS_SOS@additionalKVPs <- list(mergeObservationsIntoDataArray = TRUE)
+
+# add SOS to parameters
 parList$sos <- TaMIS_SOS
 
+# get obs for the list of the parameters/arguments in parList
 targetObs <- do.call(getObservation, parList)
 
 # updateStatus("Requested observedproperty observations successfully")
 
-# updateStatus("Plotting observedproperty")
-
 targetObs_STFDF <- as.STFDF.list.Om_OMObservation(targetObs)
+
+# updateStatus("targetObs_STFDF succesfully created.")
+
+# updateStatus("Plotting observedproperty:")
+
+if(substr(parList$procedure, 1, 10) == "WaterLevel" & TT) {
+  colnames(targetObs_STFDF@data) <- "WaterLevel"
+
+## aggregate values to daily averages
+targetObs_STFDF <- STFDF(targetObs_STFDF@sp,
+                         unique(as.Date(index(targetObs_STFDF@time), format = "%D")),
+                         as.data.frame(aggregate(targetObs_STFDF, STF(targetObs_STFDF@sp, 
+                                                  unique(as.Date(index(targetObs_STFDF@time), format = "%D")),
+                                                  endTime = as.POSIXct(unique(as.Date(index(targetObs_STFDF@time), format = "%D"))+1)),
+                             mean)[,1]))
+}
 
 targetObs_plot <- "targetObs_plot.png"
 png(file = targetObs_plot)
 
-tmp <- stplot(targetObs_STFDF, mode="ts")
+tmp <- stplot(targetObs_STFDF, mode="ts", typ="b")
 print(tmp)
 
 graphics.off()
 
 # wps.out: targetObs_plot, png;
 
-if(parList$observedProperty == "Wasserstand_im_Damm") {
+if(parList$observedProperty == "Wasserstand_im_Damm" | TT) {
   times <- as.character(index(targetObs_STFDF@time))
 } else {
   times <- as.character(index(targetObs_STFDF@time))
@@ -345,6 +419,9 @@ if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
                 strptime(fuellstandPred$observationData@result$phenomenonTime, 
                 format="%Y-%m-%d %H:%M"))
   
+  precipIds <- which(niederschlagPred$observationData@result$Niederschlagshoehe > 200)
+  mIds[precipIds] <- NA
+  
   fuellstandPredVec <- as.numeric(fuellstandPred$observationData@result$Speicherfuellstand)
   fuellstandPredVec <- fuellstandPredVec[mIds[!is.na(mIds)]]
   
@@ -363,10 +440,10 @@ niederschlagPredVec[niederschlagPredVec > 200] <- NA
 
 targetVec <- targetObs_STFDF@data[[1]]
 
-if (length(times) < 10 | any(c(is.na(sosInputFuellstand),
-                              is.na(sosInputNiederschlag)))) {
+if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
+                              is.na(sosInputNiederschlag))))) {
   load("preDefModel.RData")
-  lmMod <- switch(targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "featureOfInterest")]][2],
+  lmMod <- switch(targetBreakUp[["featureOfInterest"]][2],
                   'Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper' = MQA1mod,
                   'Bever-Talsperre_MQA3_Piezometer_Luftseite' = MQA3mod,
                   'Bever-Talsperre_MQA4_Piezometer_Luftseite' = MQA4mod,
@@ -374,6 +451,16 @@ if (length(times) < 10 | any(c(is.na(sosInputFuellstand),
                   'Bever-Talsperre_MQA7_Piezometer_Kalkzone' = MQA7mod,
                   'Bever-Talsperre_Sickerwassermessstelle_S2A' = S2Amod,
                   'Bever-Talsperre_Sickerwassermessstelle_S2B' = S2Bmod)
+}
+if (TT & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
+                                     is.na(sosInputNiederschlag))))) {
+  load("preDefModel.RData")
+  lmMod <- switch(targetBreakUp[["procedure"]][2],
+                  'WaterLevelE10006' = E10006,
+                  'WaterLevelE10013' = E10013,
+                  'WaterLevelE10014' = E10014,
+                  'WaterLevelE10015' = E10015,
+                  'WaterLevelE10019' = E10019)
 } else {
   lmMod <- lm(targetVec ~ fuellstandVec + niederschlagVec)
   # summary(lmMod)
@@ -384,10 +471,17 @@ if (length(times) < 10 | any(c(is.na(sosInputFuellstand),
   # MQA5mod <- lmMod
   # MQA7mod <- lmMod
   
+  # E10006 <- lmMod
+  # E10013 <- lmMod
+  # E10014 <- lmMod
+  # E10015 <- lmMod
+  # E10019 <- lmMod
+  
   # S2Amod <- lmMod
   # S2Bmod <- lmMod
   # save(MQA1mod, MQA3mod, MQA4mod, MQA5mod, MQA7mod,
   #      S2Amod, S2Bmod,
+  #      E10006, E10013, E10014, E10015, E10019, 
   #      file="preDefModel.RData")
 }
 
@@ -402,6 +496,8 @@ graphics.off()
 df <- data.frame(niederschlagVec=niederschlagPredVec, fuellstandVec=fuellstandPredVec)
 
 df$targetVec <- predict(lmMod, df)
+
+df <- df[!apply(df, 1, function(x) any(is.na(x))),]
   
 # wps.out: model_diagnostics, png;
 
@@ -413,7 +509,7 @@ p2 <- xyplot(df$targetVec ~  df$fuellstandVec,
        xlab="Fuellstand",
        ylab=colnames(targetObs_STFDF@data))
 
-p3 <- xyplot(predict(lmMod, niederschlagVec=niederschlagVec, fuellstandVec=fuellstandVec) ~ targetVec,
+p3 <- xyplot(predict(lmMod, data.frame(niederschlagVec=niederschlagVec, fuellstandVec=fuellstandVec)) ~ targetVec,
      xlab=paste("Model", colnames(targetObs_STFDF@data)),
      ylab=paste("gemessen", colnames(targetObs_STFDF@data)),
      panel = function(x, y) {
@@ -431,15 +527,16 @@ grid <- data.frame(niederschlagVec = rep(seq(min(niederschlagVec, na.rm = T), ma
 grid$fuellstandVec <- rep(seq(min(fuellstandVec, na.rm = T), max(fuellstandVec, na.rm = T),length.out = 20), 20)
 grid$targetVec <- predict(lmMod, grid)
 
-p4 <- wireframe(targetVec ~ niederschlagVec + fuellstandVec, grid,
+p4 <- wireframe(targetVec ~ niederschlagVec + fuellstandVec, grid, 
                 xlab="Niederschlag",
                 ylab="Fuellstand",
                 zlab=list(colnames(targetObs_STFDF@data), rot=93),
+                scales = list(arrows=F),
+                # xlim=c(0,15), ylim=c(294.6, 295.1), zlim=c(290, 302),
                 panel =  function(x, y, z, ...) {
                   panel.wireframe(x, y, z, ...)
-                  panel.cloud(df$niederschlagVec, df$fuellstandVec, df$targetVec, ...)
-                },
-                scales = list(arrows=F))
+                  panel.cloud(x=df$niederschlagVec, y=df$fuellstandVec, z=df$targetVec, ...)
+                })
 
 relations <- "relations.png"
 png(file = relations)
@@ -470,7 +567,7 @@ if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
 # readLines("TimeSeriesMetadataSimple.json")
 # str(readLines("TimeSeriesMetadataSimple.json"))
 
-statLabel <- targetBreakUp[[which(lapply(targetBreakUp, function(x) x[[1]]) == "featureOfInterest")]][2]
+statLabel <- targetBreakUp[["featureOfInterest"]][2]
 rndId <- function() paste("ts", paste(sample(c(0:9,letters[1:6]), 32, replace = T),collapse=""), sep="_")
 
 rndIdInst <- rndId()
@@ -487,18 +584,6 @@ writeLines(toJSON(targetJsonMeta), metaJson)
 
 # wps.out: metaJson, json; 
 
-# fromJSON(file=metaJson)
-
-# dataJson <- fromJSON(file="TimeSeriesRawData.json")
-# str(dataJson)
-# 
-# readLines("TimeSeriesRawData.json")
-# str(readLines("TimeSeriesRawData.json"))
-# 
-# dataJson[[1]]
-# 
-# str(df)
-
 bindTimeData <- cbind(predTimes, df$targetVec)
 colnames(bindTimeData) <- NULL
 bindTimeData <- apply(bindTimeData, 1, function(x) list(timestamp=x[1], value=x[2]))
@@ -511,4 +596,221 @@ writeLines(toJSON(targetDataJson), dataJson)
 
 # wps.out: dataJson, json;
 
-# fromJSON(file=dataJson)
+# wps.off;
+targetSOS <- "https://tamis.dev.52north.org/sos/service"
+# wps.on;
+
+## push values into target SOS
+
+if(!is.na(targetSOS)) {
+  nowSecs <- round(as.numeric(Sys.time()), 0)
+  
+  targetFoi <- targetBreakUp[["featureOfInterest"]][2]
+  targetObsPropURI <- targetBreakUp[["observedProperty"]][2]
+  targetObsProp <- tail(strsplit(targetObsPropURI, "/")[[1]], 1)
+
+  foiRet <- getFeatureOfInterest(TaMIS_SOS, featureOfInterest = targetFoi)
+  
+  targetCoords <- as.numeric(strsplit(foiRet$featureMember@feature@shape@point@pos@pos, " ")[[1]])
+  
+  # check whether appropriate sensor exists in sos, if not, insert new sensor "linearRegression_obsProp"
+  # then push data
+  
+  push_SOS <- SOS(url = targetSOS,
+                   version = "2.0.0", binding = "KVP")
+  
+  push_Cap <- getCapabilities(push_SOS)
+  
+  push_off <- paste("linearRegression", targetObsProp, sep="_")
+  
+  if (length(grep(push_off, names(push_Cap@contents@observationOfferings))) == 0) {
+    sensor <- list(list("key:uniqueID", paste("http://www.52north.org/test/procedure/linearRegression_b", 
+                                              targetObsProp, sep="_")),
+                   list("key:longName", "52°North Initiative for Geospatial Open Source Software GmbH (http://52north.org)"),
+                   list("key:shortName", "52°North GmbH"),
+                   list("key:fieldName", "\"Offering of linear regression WPS\""),
+                   list("key:offeringID:name", "Offering of linear regression WPS"),
+                   list("key:offeringID:value", paste("http://www.52north.org/test/offering/linearRegression_b",
+                                                      targetObsProp, sep="_")),
+                   list("key:featureOfInterestID", paste("http://www.52north.org/test/featureOfInterest/",
+                                                         targetFoi, sep="")),
+                   list("key:northing", targetCoords[1]),
+                   list("key:easting",  targetCoords[2]),
+                   inputList=list(list(name=targetObsProp,
+                                       definition=targetObsPropURI)),
+                   outputList=list(list(name=targetObsProp,
+                                        scale="Quantity",
+                                        definition=targetObsPropURI,
+                                        uom="<swe:uom code=\"NOT_DEFINED\"/>")),
+                   observableProperties=list(targetObsPropURI))
+    
+    insSenRet <- insertSensor("https://tamis.dev.52north.org/sos/service", sensor,
+                              update=FALSE,
+                              add_headers(Authorization=tamis.dev.auth),
+                              template="InsertSensorLinearRegression.xml")
+  }
+  
+  inputDf <- data.frame(phenomenonTime = format(as.POSIXct(predTimes, origin = "1970-01-01"), format="%Y-%m-%dT%H:%M:%S"),
+                        targetVec = df[,3])
+  colnames(inputDf) <- c("phenomenonTime", targetObsProp)
+  
+  fieldDefs <- list(phenomenonTime=c("<swe:Time definition=\"http://www.opengis.net/def/property/OGC/0/PhenomenonTime\">",
+                                     "<swe:uom xlink:href=\"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"/>",
+                                     "</swe:Time>"))
+  fieldDefs[[targetObsProp]] <- c(paste("<swe:Quantity definition=\"", targetObsPropURI, "\">", sep=""),
+                                  "<swe:uom code=\"NOT_DEFINED\"/>",
+                                  "</swe:Quantity>")
+  
+  proj4split <- sapply(strsplit(targetObs_STFDF@sp@proj4string@projargs, c(" "))[[1]],
+                       function(x) strsplit(x, "="))
+  epsgID <- which(sapply(proj4split, function(x) "+init" %in% x))
+  epsgCode <- strsplit(proj4split[[epsgID]][2], ":")[[1]][2]
+  
+  metaMeasure <- list(list("key:offering", paste("http://www.52north.org/test/offering/linearRegression_b",
+                                                 targetObsProp, sep="_")),
+                      list("key:description", "predictions based on a linear regression"),
+                      list("key:identifier", paste("http://www.52north.org/test/observation/",
+                                                   nowSecs, sep="")),
+                      list("key:procedure", paste("\"http://www.52north.org/test/procedure/linearRegression_b_",
+                                                  targetObsProp,"\"", sep="")),
+                      list("key:obsProp", paste("\"",targetObsProp,"\"", sep="")),
+                      list("key:wml:gml:id", paste("\"", foiRet$featureMember@feature@id, "\"", sep="")),
+                      list("key:resultTime", as.character(format(as.POSIXct(nowSecs, origin="1970-01-01"),
+                                                                     format="%Y-%m-%dT%H:%M:%SZ"))),
+                      list("key:gml:identifier", paste("http://www.52north.org/test/featureOfInterest/",
+                                                      targetFoi, sep="")),
+                      list("key:sf", paste("\"http://www.52north.org/test/featureOfInterest/sf_",
+                                           targetFoi, "\"", sep="")),
+                      list("key:point:gml:id",paste("\"", targetFoi, "\"", sep="")))
+  
+  insMeasRet <- insertMeasurements(targetSOS, coords = targetCoords,
+                                 ts=inputDf, 
+                                   meta = metaMeasure,
+                                   fieldDefs = fieldDefs,
+                                   srsName = "http://www.opengis.net/def/crs/EPSG/0/31466",
+                                   template = "InsertMeasurementLinearRegression.xml",
+                                   header=add_headers(Authorization=tamis.dev.auth))
+
+  cat(memDecompress(insMeasRet$content, type = "none", asChar = T))
+}
+
+# wps.off;
+################
+# 
+# # insert new sensor
+# 
+# targetFoi <- targetBreakUp[["featureOfInterest"]][2]
+# targetObsPropURI <- targetBreakUp[["observedProperty"]][2]
+# targetObsProp <- tail(strsplit(targetObsPropURI, "/")[[1]], 1)
+# 
+# foiRet <- getFeatureOfInterest(TaMIS_SOS, featureOfInterest = targetFoi)
+# 
+# targetCoords <- as.numeric(strsplit(foiRet$featureMember@feature@shape@point@pos@pos, " ")[[1]])
+# 
+# sensor <- list(list("key:uniqueID", "http://www.52north.org/test/procedure/linearRegression"),
+#                list("key:longName", "52°North Initiative for Geospatial Open Source Software GmbH (http://52north.org)"),
+#                list("key:shortName", "52°North GmbH"),
+#                list("key:fieldName", "\"Offering of linear regression WPS\""),
+#                list("key:offeringID:name", "Offering of linear regression WPS"),
+#                list("key:offeringID:value", "http://www.52north.org/test/offering/linearRegression"),
+#                list("key:featureOfInterestID", paste("http://www.52north.org/test/featureOfInterest/",
+#                                                      targetFoi)),
+#                list("key:easting",  targetCoords[2]),
+#                list("key:northing", targetCoords[1]),
+#                inputList=list(list(name=targetObsProp,
+#                                    definition=targetObsPropURI)),
+#                outputList=list(list(name=targetObsProp,
+#                                     scale="Quantity",
+#                                     definition=targetObsPropURI,
+#                                     uom="<swe:uom code=\"NOT_DEFINED\"/>")),
+#                observableProperties=list(targetObsPropURI))
+# 
+# insSenRet <- insertSensor("https://tamis.dev.52north.org/sos/service", sensor,
+#                           update=FALSE,
+#                           add_headers(Authorization=tamis.dev.auth),
+#                           template="InsertSensorLinearRegression.xml")
+
+# cat(memDecompress(insSenRet$content, type="none", asChar = T))
+
+####################
+# 
+# updateSensor <- function(SOS, procedure, additional, ...) {
+#   descReq <- paste("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+# <swes:DescribeSensor service=\"SOS\" version=\"2.0.0\"
+#     xmlns:swes=\"http://www.opengis.net/swes/2.0\"
+#     xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+#     xmlns:gml=\"http://www.opengis.net/gml/3.2\"
+#     xmlns:swe=\"http://www.opengis.net/swe/2.0\" xsi:schemaLocation=\"http://www.opengis.net/swes/2.0 http://schemas.opengis.net/swes/2.0/swes.xsd http://www.opengis.net/swe/2.0 http://schemas.opengis.net/sweCommon/2.0/swe.xsd\">
+#     <swes:procedure>http://www.52north.org/test/procedure/", procedure, "</swes:procedure>
+#     <swes:procedureDescriptionFormat>http://www.opengis.net/sensorML/1.0.1</swes:procedureDescriptionFormat>
+# </swes:DescribeSensor>", sep="")
+#   
+#   describeSensor <- POST(SOS, body = descReq,
+#                          verbose(), content_type_xml())
+#   
+#   describeSensor <- memDecompress(describeSensor$content, type = "none", asChar = T)
+#   describeSensor <- strsplit(describeSensor, "\n")[[1]]
+#   describeSensor <- sapply(describeSensor[11], function(x) strsplit(x, "\\n", fixed=TRUE)[[1]])
+#   
+#   describeSensor[1] <- strsplit(describeSensor[1], ": \"")[[1]][2]
+# 
+#   lId <- length(describeSensor)
+#   describeSensor[lId] <- gsub("\"", "", describeSensor[lId], fixed=T)
+#   
+#   describeSensor <- sapply(describeSensor, function(x) gsub("\\", "", x, fixed=T))
+#   
+#   describeSensor <- apply(matrix(grep("validTime", describeSensor), ncol=2, byrow=T), 1, 
+#                           function(x) describeSensor <- describeSensor[-c(x[1]:x[2])])[,1]
+#   
+#   for (i in 1:length(additional)) { # i <- 1
+#     loc <- tail(grep(tail(additional[[i]], 1), describeSensor), 1)
+#     if(length(loc) == 0)
+#       break;
+#     describeSensor <- c(describeSensor[1:loc],
+#                         additional[[i]],
+#                         describeSensor[-c(1:loc)])
+#   }
+#   
+#   preAmbleUpdate <- paste("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+# <swes:UpdateSensorDescription service=\"SOS\" version=\"2.0.0\"
+#                           xmlns:swes=\"http://www.opengis.net/swes/2.0\"
+#                           xmlns:sos=\"http://www.opengis.net/sos/2.0\"
+#                           xmlns:swe=\"http://www.opengis.net/swe/1.0.1\"
+#                           xmlns:sml=\"http://www.opengis.net/sensorML/1.0.1\"
+#                           xmlns:gml=\"http://www.opengis.net/gml\"
+#                           xmlns:xlink=\"http://www.w3.org/1999/xlink\"
+#                           xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/swes/2.0 http://schemas.opengis.net/swes/2.0/swes.xsd\">
+#                           <swes:procedure>http://www.52north.org/test/procedure/", 
+#                           procedure, 
+#                           "</swes:procedure>
+#                           <swes:procedureDescriptionFormat>http://www.opengis.net/sensorML/1.0.1</swes:procedureDescriptionFormat>
+#                           <swes:description>
+#                           <swes:SensorDescription>
+#                           <swes:data>", sep="")
+#   
+#   postAmbleUpdate <- " </swes:data>
+#         </swes:SensorDescription>
+#     </swes:description>
+# </swes:UpdateSensorDescription>"
+#     
+#   describeSensor <- c(preAmbleUpdate,
+#                       describeSensor,
+#                       postAmbleUpdate)
+#   
+#   POST(SOS, body = paste(describeSensor, collapse="\n"),
+#        verbose(), content_type_xml(),  ...)
+#   
+#   # cat(paste(describeSensor, collapse="\n"))
+# }
+# 
+# adds <- list(c("<sml:input name=\"Schuettmenge\">",
+#                "<swe:ObservableProperty definition=\"Schuettmenge\"/>",
+#                "</sml:input>"),
+#              c("<sml:output name=\"Schuettmenge\">",
+#                "<swe:Quantity definition=\"Schuettmenge\">",
+#                "<swe:uom code=\"NOT_DEFINED\"/>",
+#                "</swe:Quantity>",
+#                "</sml:output>"))
+# 
+# updateSensor(SOS = targetSOS, procedure = "linearRegression", additional = adds,
+#              add_headers(Authorization=tamis.dev.auth)) 

@@ -1,1 +1,1 @@
-{"id":"ts_23b077753b823eeefad72a0eea4ff451","label":"Wasserstand_im_Damm","station":{"properties":{"id":"ts_23b077753b823eeefad72a0eea4ff451","label":"Bever-Talsperre_MQA7_Piezometer_Kalkzone"},"geometry":{"coordinates":[2595872.3677,5668293.3846],"type":"point"},"type":"Feature"}}
+{"id":"ts_f8910b07e3f801c70fe05935a7d09eba","label":"Sch\u00fcttmenge","station":{"properties":{"id":"ts_f8910b07e3f801c70fe05935a7d09eba","label":"Bever-Talsperre, Sickerwassermessstelle S1"},"geometry":{"coordinates":[7.36906759723894,51.1422384291326],"type":"point"},"type":"Feature"}}
