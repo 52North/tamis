@@ -24,7 +24,7 @@
 # abstract = timeseries URI for prediction values: Fuellstand,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
-# wps.in: timespanpPredict, string, prediction time stamp, 
+# wps.in: timespanPredict, string, prediction time stamp, 
 # abstract = timestamp for which the prediction shall be made,
 # value = "2016-03-01T/2016-03-31TZ";
 
