@@ -26,8 +26,11 @@
 # Ableiten des Sickerwassers aus Niederschlag und Füllhöhe
 # evtl zweiter Schritt um den Wasserstand im Damm über Piezometer aus dem Sohlenwasserdruck abzuleiten.
 
-# Wasserstand im Damm aus den Piezometern (alle 14 Tage und bei "Bedarf")
+# Wasserstand im Damm aus den Piezometern (abgeleitet; alle 14 Tage und bei "Bedarf")
 # http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries?phenomenon=32&offering=277
+#
+# Wasserstand im Damm aus den Piezometern (Handeingabe der "tiefe"; alle 14 Tage und bei "Bedarf")
+# http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries?phenomenon=32&offering=269
 # 
 # Wasserstand im Damm aus dem Sohlenwasserdruck (täglich)
 # http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries?phenomenon=35&offering=272

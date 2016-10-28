@@ -41,7 +41,7 @@
 timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timespan <- "2016-01-01T/2016-04-30TZ"
+timespan <- "2016-01-01T/2016-09-30TZ"
 # wps.on;
 
 library(RCurl)
@@ -154,7 +154,7 @@ for (ts in tsIDs) {
 
   lmMod <- lm(targetVar ~ fillLevel + precip, df)
   
-  modList[[ts]] <- lmMod
+  modList[[as.character(ts)]] <- lmMod
   cat("\n This is timeseries ID:", ts, "\n")
   print(summary(lmMod))
   setTxtProgressBar(pb, which(tsIDs == ts))
@@ -162,3 +162,10 @@ for (ts in tsIDs) {
 
 close(pb)
 save(modList, file="preDefTSModel.RData")
+
+## diagnostics
+hist(sapply(modList, function(x) summary(x)$adj.r.squared), n=20)
+
+which(sapply(modList, function(x) summary(x)$adj.r.squared) < 0.1)
+
+summary(modList[["518"]])

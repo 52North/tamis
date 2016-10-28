@@ -1,8 +1,8 @@
-# wps.des: tamis-rest-interpolation, title = Interpolation of Schuettmenge at Bevertalsperre;
+# wps.des: tamis-rest-interpolation, title = Interpolation of Wasserstand at Bevertalsperre;
 
 # wps.in: timeseries, string, set of TS URIs, whitespace " " seperated, 
 # abstract = timeseries URI as data source,
-# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455";
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/444 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/491 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/492 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/435 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/436 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/437 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/438 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/439 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/440 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/441 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/442";
 
 # wps.in: timespan, string, timespan of input data, 
 # abstract = timeseries URI for the interpolation variable,
@@ -24,7 +24,7 @@ library(gstat)
 library(rgdal)
 library(RCurl)
 
-# "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469";
+# "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/444 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/491 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/492 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/435 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/436 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/437 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/438 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/439 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/440 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/441 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/442";
 
 # updateStatus("helper functions")
 
@@ -80,8 +80,8 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 
-timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455"
-timespan <-  "2016-01-01T/2016-09-30TZ"
+timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/513 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/516 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/472 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/475 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/477  http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/478 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479  http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/480 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/481 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/483"
+timespan <-  "2016-08-01T/2016-09-30TZ"
 target <- "geotiff.tiff" 
 
 # wps.on;
@@ -105,7 +105,7 @@ timeseries <- timeseries[nchar(timeseries) > 0]
 # updateStatus("loading TS data")
 
 dataObs_STFDF <- NULL
-for (ts in timeseries) { # ts <- timeseries[1]
+for (ts in timeseries) { # ts <- timeseries[3]
   source <- readTSdata(ts, timespan, .opts)
   if(is.null(dataObs_STFDF)) {
     dataObs_STFDF <- source
@@ -114,7 +114,8 @@ for (ts in timeseries) { # ts <- timeseries[1]
   dataObs_STFDF <- rbind(dataObs_STFDF, source)
 }
 
-colnames(dataObs_STFDF@data) <- "Schuettmenge"
+colnames(dataObs_STFDF@data) <- "Wasserstand"
+stplot(dataObs_STFDF[,], mode="ts")
 
 # updateStatus("Setting CRS")
 
@@ -126,7 +127,7 @@ n.time <- length(dataObs_STFDF@time)
 
 dataPos <- "dataPos.png"
 png(file = dataPos)
-tmpDataPos <- stplot(dataObs_STFDF[,1:min(6, n.time)])
+tmpDataPos <- stplot(dataObs_STFDF[,1:min(12, n.time)])
 print(tmpDataPos)
 graphics.off()
 
@@ -137,7 +138,7 @@ graphics.off()
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 colnames(dataObs_STFDF@sp@coords) <- c("x","y")
 
-empVgm <- variogram(Schuettmenge ~ 1, dataObs_STFDF, tlags=0)
+empVgm <- variogram(Wasserstand ~ 1, dataObs_STFDF, tlags=0)
 empVgm <- empVgm[-1,]
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
@@ -145,7 +146,7 @@ class(empVgm) <- c("gstatVariogram","data.frame")
 empVgm <- empVgm[empVgm$np>0,]
 
 if(n.time >= 10) {
-  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 50))
+  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 60))
   tmpPlot <- plot(empVgm, fitVgm)
 } else {
   tmpPlot <- plot(empVgm)
@@ -165,13 +166,13 @@ targetVar <- NULL
 
 if (n.time >= 10) {
   for (day in 1:n.time) {
-    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
+    pred <- krige(Wasserstand ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
     targetData <- cbind(targetData, pred$var1.pred)
     targetVar <- cbind(targetVar, pred$var1.var)
   }
 } else {
   for (day in 1:n.time) {
-    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
+    pred <- krige(Wasserstand ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
     targetData <- cbind(targetData, pred$var1.pred)
     targetVar <- cbind(targetVar, pred$var1.var)
   }
@@ -218,7 +219,7 @@ if(isGrid) {
   # wps output
   predMap <- "predMap.png"
   png(file = predMap)
-  tmpPlot <- stplot(target_STFDF[,sample(n.time, 12)],
+  tmpPlot <- stplot(target_STFDF[,sort(sample(n.time, min(n.time,12)))],
                     sp.layout=list("sp.points", dataObs_STFDF@sp))
   print(tmpPlot)
   graphics.off()

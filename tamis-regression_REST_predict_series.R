@@ -34,7 +34,7 @@
 timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
+timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/444"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
 #wps.on;
