@@ -1,0 +1,43 @@
+# Station look-up table
+
+# Wasserstand im Damm aus den Piezometern (alle 14 Tage und bei "Bedarf")
+# http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries?phenomenon=32&offering=277
+
+# MQA1: 592
+# MQA3: 593
+# MQA4: 594
+# MQA5: 584
+
+# MQB1: 585
+# MQB2: 586
+# MQB4: 587
+# MQB5: 588
+# MQB6: 589
+# MQB7: 590
+
+# MQC2: 597
+
+# Wasserstand im Damm aus dem Sohlenwasserdruck (täglich)
+# http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries?phenomenon=35&offering=272
+
+SWD1.1L:  444
+SWD1.2L:  491
+SWD1.3L:  492
+SWD1.4L:  435
+SWD1.5L:  436
+SWD1.6L:  437
+SWD1.7L:  438
+SWD1.8L:  439
+SWD1.9L:  440
+SWD1.10L: 441
+SWD1.11L: 442
+SWD1.12L: 456
+SWD1.13L: 457
+
+SWD1W: 510
+SWD1.1W: 511
+SWD1L: 512
+
+SWD2A: 517
+SWD3A: 518
+

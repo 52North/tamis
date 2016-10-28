@@ -18,11 +18,30 @@
 
 #################################
 
+# A)
+# Ableiten des Wasserstand im Damm über den Sohlenwasserdruck (SWD) aus Niederschlag und Füllhöhe
+# evtl zweiter Schritt um den Wasserstand im Damm über Piezometer aus dem Sohlenwasserdruck abzuleiten.
+
+# B)
+# Ableiten des Sickerwassers aus Niederschlag und Füllhöhe
+# evtl zweiter Schritt um den Wasserstand im Damm über Piezometer aus dem Sohlenwasserdruck abzuleiten.
+
+# Wasserstand im Damm aus den Piezometern (alle 14 Tage und bei "Bedarf")
+# http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries?phenomenon=32&offering=277
+# 
+# Wasserstand im Damm aus dem Sohlenwasserdruck (täglich)
+# http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries?phenomenon=35&offering=272
+# 
+# Das Sickerwasser gemssen als Schüttmenge in l/s
+# http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries?phenomenon=34&offering=272
+
+# Hier: Verdichtung der Zeitreihen über Niederschlag und Füllhöhe 
+
 # wps.off;
 timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
+timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/444"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
 # wps.on;
@@ -84,6 +103,12 @@ precip <- readTSdata(timeseriesNiederschlag, timespan)
 fillLevel <- readTSdata(timeseriesFuellstand, timespan)
 targetVar <- readTSdata(ts_URI = timeseriesZielvariable, timespan, .opts)
 
+as.POSIXct(1477263600, origin="1970-01-01 00:00:00")
+
+as.numeric(Sys.Date())
+
+debugonce(readTSdata)
+
 precipMeta <- readTSmeta(timeseriesNiederschlag)
 fillLevelMeta <- readTSmeta(timeseriesFuellstand)
 targetVarMeta <- readTSmeta(timeseriesZielvariable, .opts)
@@ -130,16 +155,9 @@ df <- df[apply(df,1, function(x) !any(is.na(x[c("precip", "fillLevel")]))),]
 
 if (sum(!is.na(df$targetVar)) < 10) {
   load("preDefTSModel.RData")
-  lmMod <- switch(tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1),
-                  '194' = mod194,
-                  stop("No model present, use longer time series to fit one."))
+  lmMod <- modList[[tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1)]]
 } else {
   lmMod <- lm(targetVar ~ fillLevel + precip, df)
-  # summary(lmMod)
-  
-  # mod194 <- lmMod
-  # save(mod194,
-  #      file="preDefTSModel.RData")
 }
 
 model_diagnostics <- "model_diagnostics.png"
