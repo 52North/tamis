@@ -115,7 +115,7 @@ for (ts in timeseries) { # ts <- timeseries[3]
 }
 
 colnames(dataObs_STFDF@data) <- "Wasserstand"
-stplot(dataObs_STFDF[,], mode="ts")
+# stplot(dataObs_STFDF[,], mode="ts")
 
 # updateStatus("Setting CRS")
 
