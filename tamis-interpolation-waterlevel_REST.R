@@ -1,4 +1,4 @@
-# wps.des: tamis-rest-interpolation, title = Interpolation of Wasserstand at Bevertalsperre;
+# wps.des: tamis-rest-interpolation-wasserstand, title = Interpolation of Wasserstand at Bevertalsperre;
 
 # wps.in: timeseries, string, set of TS URIs, whitespace " " seperated, 
 # abstract = timeseries URI as data source,
