@@ -24,7 +24,7 @@
 # wps.in: singleInputFuellstandPred, integer, single value, 
 # abstract = single value for prediction values: Fuellstand, minOccurs = 0, maxOccurs = 1;
 
-# wps.in: targteSOS, URL, SOS-Url, 
+# wps.in: targteSOS, string, SOS-Url, 
 # abstract = URL of the SOS receiving the predictions, minOccurs = 0, maxOccurs = 1;
 
 
