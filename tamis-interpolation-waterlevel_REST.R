@@ -193,10 +193,10 @@ graphics.off()
 
 # wps.out: dataPos, png;
 
-dataPos <- "dataTS.png"
+dataTS <- "dataTS.png"
 png(file = dataTS)
-tmpDataPos <- stplot(dataObs_STFDF[,, "Wasserstand", drop=F], mode="ts")
-print(tmpDataPos)
+tmpDataTS <- stplot(dataObs_STFDF[,, "Wasserstand", drop=F], mode="ts")
+print(tmpDataTS)
 graphics.off()
 
 # wps.out: dataTS, png;
