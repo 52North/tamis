@@ -18,6 +18,7 @@
 
 library(httr)
 library(rjson)
+library(lattice)
 library(sp)
 library(spacetime)
 library(gstat)
