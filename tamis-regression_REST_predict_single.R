@@ -51,7 +51,7 @@ source("tamis-regression-common.R")
 
 # wps.on;
 
-# wps.out: model_diagnostics, png;
+# wps.out: modelDiagnostics, png;
 
 # wps.out: relations, png;
 
@@ -79,7 +79,7 @@ predDf$predVar <- predict(lmMod, predDf)
 model_prediction <- "model_prediction.csv"
 write.csv(predDf, file = model_prediction)
 
-# wps.out: model_prediction, csv;
+# wps.out: modelPrediction, csv;
 
 ##### json
 

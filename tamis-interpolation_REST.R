@@ -1,8 +1,8 @@
-# wps.des: tamis-rest-interpolation, title = Interpolation of Schuettmenge at Bevertalsperre;
+# wps.des: tamis-rest-interpolation-schuettmenge, title = Interpolation of Schuettmenge at Bevertalsperre;
 
 # wps.in: timeseries, string, set of TS URIs, whitespace " " seperated, 
 # abstract = timeseries URI as data source,
-# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469";
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455";
 
 # wps.in: timespan, string, timespan of input data, 
 # abstract = timeseries URI for the interpolation variable,
@@ -23,6 +23,8 @@ library(spacetime)
 library(gstat)
 library(rgdal)
 library(RCurl)
+
+# "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469";
 
 # updateStatus("helper functions")
 
@@ -78,8 +80,8 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 
-timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/464 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/465 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/466 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/467 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/468 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/469"
-timespan <-  "2016-01-01T/2016-01-14TZ"
+timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455"
+timespan <-  "2016-01-01T/2016-09-30TZ"
 target <- "geotiff.tiff" 
 
 # wps.on;
@@ -132,6 +134,9 @@ graphics.off()
 
 # updateStatus("Calculate empirical variogram")
 
+dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
+colnames(dataObs_STFDF@sp@coords) <- c("x","y")
+
 empVgm <- variogram(Schuettmenge ~ 1, dataObs_STFDF, tlags=0)
 empVgm <- empVgm[-1,]
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
@@ -140,7 +145,7 @@ class(empVgm) <- c("gstatVariogram","data.frame")
 empVgm <- empVgm[empVgm$np>0,]
 
 if(n.time >= 10) {
-  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma),"Lin",60))
+  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 50))
   tmpPlot <- plot(empVgm, fitVgm)
 } else {
   tmpPlot <- plot(empVgm)
@@ -154,9 +159,6 @@ graphics.off()
 # wps.out: vgmFit, png;
 
 # updateStatus("Plot fitted or selected variogram")
-
-dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
-colnames(dataObs_STFDF@sp@coords) <- c("x","y")
 
 targetData <- NULL
 targetVar <- NULL
@@ -203,6 +205,7 @@ if (isGrid) {
 # if a grid is presented, a NetCDF file can be returned
 
 if(isGrid) {
+  gridded(target) <- TRUE
   target_fullGrid <- target
   fullgrid(target_fullGrid) <- TRUE
   
@@ -215,7 +218,7 @@ if(isGrid) {
   # wps output
   predMap <- "predMap.png"
   png(file = predMap)
-  tmpPlot <- stplot(target_STFDF,
+  tmpPlot <- stplot(target_STFDF[,sample(n.time, 12)],
                     sp.layout=list("sp.points", dataObs_STFDF@sp))
   print(tmpPlot)
   graphics.off()

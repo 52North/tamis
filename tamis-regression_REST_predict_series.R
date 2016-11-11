@@ -24,7 +24,7 @@
 # abstract = timeseries URI for prediction values: Fuellstand,
 # value = "http://www.fluggs.de/sos2/api/v1/timeseries/26";
 
-# wps.in: timespanpPredict, string, prediction time stamp, 
+# wps.in: timespanPredict, string, prediction time stamp, 
 # abstract = timestamp for which the prediction shall be made,
 # value = "2016-03-01T/2016-03-31TZ";
 
@@ -34,7 +34,7 @@
 timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
+timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/444"
 
 timespan <- "2016-01-01T/2016-02-29TZ"
 #wps.on;

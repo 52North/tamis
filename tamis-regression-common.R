@@ -100,18 +100,11 @@ df <- df[apply(df,1, function(x) !any(is.na(x))),]
 
 # modelling
 
-if (nrow(df) < 10) {
+if (sum(!is.na(df$targetVar)) < 10) {
   load("preDefTSModel.RData")
-  lmMod <- switch(tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1),
-                  '194' = mod194,
-                  stop("No model present, use longer time series to fit one."))
+  lmMod <- modList[[tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1)]]
 } else {
   lmMod <- lm(targetVar ~ fillLevel + precip, df)
-  # summary(lmMod)
-  
-  # mod194 <- lmMod
-  # save(mod194,
-  #      file="preDefTSModel.RData")
 }
 
 model_diagnostics <- "model_diagnostics.png"

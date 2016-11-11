@@ -5,7 +5,7 @@
 # value = http://fluggs.wupperverband.de/sos2-tamis/service?service%3DSOS&version%3D2.0.0&request%3DGetObservation&responseformat%3Dhttp://www.opengis.net/om/2.0&observedProperty%3DSchuettmenge&procedure%3DTageswert_Prozessleitsystem&namespaces%3Dxmlns%28sams%2Chttp%3A%2F%2Fwww.opengis.net%2FsamplingSpatial%2F2.0%29%2Cxmlns%28om%2Chttp%3A%2F%2Fwww.opengis.net%2Fom%2F2.0%29&temporalFilter%3Dom%3AphenomenonTime%2C2016-02-01T10:00:00.00Z%2F2016-02-28T10:00:00.00Z;
 
 # wps.in: target, type = geotiff, 
-# abstract = geotiff defining the interpolation grid (only non NAs will be interpolated);
+# abstract = URL to a geotiff defining the interpolation grid (only non NAs will be interpolated);
 
 # wps.in: targetSOS, string, SOS, 
 # abstract = target SOS-URL for the output;

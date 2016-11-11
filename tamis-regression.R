@@ -24,6 +24,9 @@
 # wps.in: singleInputFuellstandPred, integer, single value, 
 # abstract = single value for prediction values: Fuellstand, minOccurs = 0, maxOccurs = 1;
 
+# wps.in: targteSOS, string, SOS-Url, 
+# abstract = URL of the SOS receiving the predictions, minOccurs = 0, maxOccurs = 1;
+
 
 ## tamis
 library(sos4R)
@@ -254,16 +257,14 @@ targetObs_STFDF <- STFDF(targetObs_STFDF@sp,
                                                   endTime = as.POSIXct(unique(as.Date(index(targetObs_STFDF@time), format = "%D"))+1)),
                              mean)[,1]))
 }
-
-targetObs_plot <- "targetObs_plot.png"
-png(file = targetObs_plot)
-
-tmp <- stplot(targetObs_STFDF, mode="ts", typ="b")
-print(tmp)
-
-graphics.off()
-
-# wps.out: targetObs_plot, png;
+# 
+# targetObs_plot <- "targetObs_plot.png"
+# png(file = targetObs_plot)
+# 
+# tmp <- stplot(targetObs_STFDF, mode="ts", typ="b")
+# print(tmp)
+# 
+# graphics.off()
 
 if(parList$observedProperty == "Wasserstand_im_Damm" | TT) {
   times <- as.character(index(targetObs_STFDF@time))
@@ -499,7 +500,7 @@ df$targetVec <- predict(lmMod, df)
 
 df <- df[!apply(df, 1, function(x) any(is.na(x))),]
   
-# wps.out: model_diagnostics, png;
+# wps.out: modelDiagnostics, png;
 
 library(lattice)
 p1 <- xyplot(df$targetVec ~ df$niederschlagVec,
@@ -558,7 +559,7 @@ if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
   write.csv(df, file = model_prediction)
 }
 
-# wps.out: model_prediction, csv;
+# wps.out: modelPrediction, csv;
 
 ##### json
 
