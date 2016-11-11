@@ -1,4 +1,4 @@
-# wps.des: tamis-rest-fill-series, title = TaMIS Prediction Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
+# wps.des: tamis-rest-re-fit-models, title = TaMIS Prediction Regression Model for Wasserstand_im_Damm or Schuettmenge at Bever-Talsperre;
 
 # wps.in: timeseriesNiederschlag, string, TS URI, 
 # abstract = timeseries Id for Niederschlag,
