@@ -2,11 +2,11 @@
 
 # wps.in: timeseries, string, set of TS URIs, whitespace " " seperated, 
 # abstract = timeseries URI as data source,
-# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/444 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/491 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/492 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/435 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/436 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/437 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/438 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/439 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/440 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/441 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/442";
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482";
 
 # wps.in: timespan, string, timespan of input data, 
 # abstract = timeseries URI for the interpolation variable,
-# value = "2016-01-01T/2016-01-07TZ";
+# value = "2016-01-01T/2016-09-30TZ";
 
 # wps.in: target, type = geotiff, 
 # abstract = geotiff defining the interpolation grid (only non NAs will be interpolated),
@@ -80,8 +80,8 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 
-timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/513 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/516 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/472 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/475 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/477  http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/478 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479  http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/480 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/481 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/483"
-timespan <-  "2016-08-01T/2016-09-30TZ"
+timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482"
+timespan <-  "2016-01-01T/2016-09-30TZ"
 target <- "geotiff.tiff" 
 
 # wps.on;
@@ -104,18 +104,78 @@ timeseries <- timeseries[nchar(timeseries) > 0]
 
 # updateStatus("loading TS data")
 
+heightCorrection <- TRUE
+
 dataObs_STFDF <- NULL
 for (ts in timeseries) { # ts <- timeseries[3]
-  source <- readTSdata(ts, timespan, .opts)
-  if(is.null(dataObs_STFDF)) {
-    dataObs_STFDF <- source
-    next;
-  }
+  source <- as(readTSdata(ts, timespan, .opts), "data.frame")
+  tsId <- tail(strsplit(ts, "/")[[1]],1)
+  if (heightCorrection)
+    source$Wasserstand.im.Damm <- switch(tsId,
+                                         "513"=297.46, # MQA1: 
+                                         "514"=298.32, # MQA3: 
+                                         "515"=287.07, # MQA4: 
+                                         "516"=286.75, # MQA5: 
+                                         "470"=275.67, # MQA7: 
+                                         "472"=296.71, # MQB1: 
+                                         "473"=298.43, # MQB2: 
+                                         "474"=287.11, # MQB4: 
+                                         "475"=287.21, # MQB5: 
+                                         "476"=275.96, # MQB6:
+                                         "477"=276.01, # MQB7: 
+                                         "478"=296.26, # MQC1: 
+                                         "479"=298.36, # MQC2: 
+                                         "480"=287.07, # MQC4: 
+                                         "481"=287.06, # MQC5: 
+                                         "482"=275.96, # MQC6
+                                         "483"=275.99) - source$Wasserstand.im.Damm # MQC7
+  source$distanceToDam <- switch(tsId,
+                                 "513"=-2.66, # MQA1: 
+                                 "514"=7.17,  # MQA3: 
+                                 "515"=28.47, # MQA4: 
+                                 "516"=28.47, # MQA5: 
+                                 "470"=52.74, # MQA7: 
+                                 "472"=-5.04, # MQB1: 
+                                 "473"=7.10,  # MQB2: 
+                                 "474"=28.41, # MQB4: 
+                                 "475"=28.10, # MQB5: 
+                                 "476"=51.90, # MQB6:
+                                 "477"=51.96, # MQB7: 
+                                 "478"=-5.17, # MQC1: 
+                                 "479"=6.98,  # MQC2: 
+                                 "480"=28.39, # MQC4: 
+                                 "481"=28.48, # MQC5: 
+                                 "482"=52.36, # MQC6
+                                 "483"=52.19) # MQC7
+                                       
+  
   dataObs_STFDF <- rbind(dataObs_STFDF, source)
 }
 
-colnames(dataObs_STFDF@data) <- "Wasserstand"
-# stplot(dataObs_STFDF[,], mode="ts")
+dataObs_STFDF <- stConstruct(dataObs_STFDF[,c(1:2,4,7:8)], space = c("coords.x1", "coords.x2"), time = "time")
+dataObs_STFDF <- as(dataObs_STFDF, "STFDF")
+colnames(dataObs_STFDF@data) <- c("Wasserstand","distanceToDam")
+
+tsIds <- sapply(timeseries, function(x) tail(strsplit(x, "/")[[1]],1))
+tsNames <- sapply(tsIds, function(x) switch(x,
+                  "513"="MQA1",
+                  "514"="MQA3",
+                  "515"="MQA4",
+                  "516"="MQA5",
+                  "470"="MQA7",
+                  "472"="MQB1",
+                  "473"="MQB2",
+                  "474"="MQB4",
+                  "475"="MQB5",
+                  "476"="MQB6",
+                  "477"="MQB7",
+                  "478"="MQC1",
+                  "479"="MQC2",
+                  "480"="MQC4",
+                  "481"="MQC5",
+                  "482"="MQC6",
+                  "483"="MQC7"))
+rownames(dataObs_STFDF@sp@coords) <- tsNames
 
 # updateStatus("Setting CRS")
 
@@ -133,25 +193,40 @@ graphics.off()
 
 # wps.out: dataPos, png;
 
+dataPos <- "dataTS.png"
+png(file = dataTS)
+tmpDataPos <- stplot(dataObs_STFDF[,, "Wasserstand", drop=F], mode="ts")
+print(tmpDataPos)
+graphics.off()
+
+# wps.out: dataTS, png;
+
 # updateStatus("Calculate empirical variogram")
 
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 colnames(dataObs_STFDF@sp@coords) <- c("x","y")
 
-empVgm <- variogram(Wasserstand ~ 1, dataObs_STFDF, tlags=0)
-empVgm <- empVgm[-1,]
+dataObs_STSDF <- as(dataObs_STFDF, "STSDF")
+
+linMod <- lm(Wasserstand ~ x+y, as(dataObs_STSDF[,,drop=F], "data.frame"))
+summary(linMod)
+
+dataObs_STSDF@data$resid <- linMod$residuals
+
+empVgm <- variogram(resid ~ 1, dataObs_STSDF, tlags=0, na.omit = TRUE, cutoff=50)
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
 
-empVgm <- empVgm[empVgm$np>0,]
+fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma)*0.5, 
+                                    "Lin", 
+                                    mean(empVgm$dist, na.rm = T),
+                                    median(empVgm$gamma)*0.5))
 
-if(n.time >= 10) {
-  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 60))
-  tmpPlot <- plot(empVgm, fitVgm)
-} else {
-  tmpPlot <- plot(empVgm)
-}
-  
+
+# updateStatus("Theoretical variogram has been fitted.")
+
+tmpPlot <- plot(empVgm, fitVgm)
+
 # wps output
 vgmFit <- "vgmFit.png"
 png(file = vgmFit)
@@ -159,30 +234,42 @@ print(tmpPlot)
 graphics.off()
 # wps.out: vgmFit, png;
 
-# updateStatus("Plot fitted or selected variogram")
+# updateStatus("Theoretical variogram has been plotted.")
 
+###
 targetData <- NULL
 targetVar <- NULL
 
-if (n.time >= 10) {
-  for (day in 1:n.time) {
-    pred <- krige(Wasserstand ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
-    targetData <- cbind(targetData, pred$var1.pred)
-    targetVar <- cbind(targetVar, pred$var1.var)
-  }
-} else {
-  for (day in 1:n.time) {
-    pred <- krige(Wasserstand ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
-    targetData <- cbind(targetData, pred$var1.pred)
-    targetVar <- cbind(targetVar, pred$var1.var)
-  }
+for (day in 1:n.time) {
+  pred <- krige(resid ~ 1, dataObs_STSDF[,day], target)#, model=fitVgm)@data
+  targetData <- cbind(targetData, pred$var1.pred)
+  targetVar <- cbind(targetVar, pred$var1.var)
 }
 
-# updateStatus("Interpolated data")
-
 target <- addAttrToGeom(geometry(target), as.data.frame(cbind(targetData, targetVar)))
+gridded(target) <- TRUE
 
-# updateStatus("Interpolated grid")
+linModPred <- predict(linMod, as.data.frame(target@coords))
+target@data <- cbind(target@data, linModPred)
+
+for (i in 1:24) { # i <- 1
+  target@data[,i] <- linModPred + target@data[,i]
+}
+
+# updateStatus("Interpolation of residuls has been performed.")
+
+n.plots <- min(12,n.time)
+
+p1 <- spplot(target[,1:n.plots],
+             sp.layout=list("sp.points",
+                            dataObs_STSDF@sp,
+                            col="black"),
+             strip=strip.custom(factor.levels=as.character(as.Date(index(dataObs_STSDF@time)))[1:n.plots]),
+             as.table=T)
+
+# png("IDW_interpolation_series_waterlevel.png", width = 2400, height = 1600, res=200)
+# print(p1)
+# dev.off()
 
 if(isGrid) {
   predictions <- "predictions.tiff"
@@ -193,11 +280,11 @@ if(isGrid) {
 
 if (isGrid) {
   gridded(target) <- TRUE
-  writeGDAL(target[,1:(ncol(target@data)/2)], predictions, drivername="GTiff")
-  writeGDAL(target[,-(1:(ncol(target@data)/2))], predVar, drivername="GTiff")
+  writeGDAL(target[,1:n.time], predictions, drivername="GTiff")
+  writeGDAL(target[,1:n.time + n.time], predVar, drivername="GTiff")
 } else {
-  write.csv(as.data.frame(target[,1:(ncol(target@data)/2)]), predictions)
-  write.csv(as.data.frame(target[,-(1:(ncol(target@data)/2))]), predVar)
+  write.csv(as.data.frame(target[,1:n.time]), predictions)
+  write.csv(as.data.frame(target[,1:n.time + n.time]), predVar)
 }
 
 # wps.out: predictions, type = geotiff;
@@ -212,9 +299,13 @@ if(isGrid) {
   
   target_STFDF <- STFDF(geometry(target_fullGrid),
                         dataObs_STFDF@time, 
-                        data.frame(var1.pred = unlist(target_fullGrid@data[,1:(ncol(target_fullGrid)/2)]),
-                                   var1.var = unlist(target_fullGrid@data[,-(1:(ncol(target_fullGrid)/2))])),
-                        index(dataObs_STFDF@time)+24*3600)
+                        data.frame(var1.pred = unlist(target_fullGrid@data[, 1:n.time]),
+                                   var1.var = unlist(target_fullGrid@data[, 1:n.time + n.time])),
+                        if(length(index(dataObs_STFDF@time)) > 1) {
+                          delta(dataObs_STFDF@time)
+                        } else {
+                          index(dataObs_STFDF@time)
+                        })
 
   # wps output
   predMap <- "predMap.png"
