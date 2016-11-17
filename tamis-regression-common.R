@@ -99,6 +99,8 @@ df$targetVar <- targetVar@data[match(joinTimeStamps, time(targetVar)),1]
 df <- df[apply(df,1, function(x) !any(is.na(x))),]
 
 # modelling
+# wps.resource: ./;
+
 
 if (sum(!is.na(df$targetVar)) < 10) {
   load("preDefTSModel.RData")

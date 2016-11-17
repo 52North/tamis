@@ -218,7 +218,7 @@ if(isGrid) {
   # wps output
   predMap <- "predMap.png"
   png(file = predMap)
-  tmpPlot <- stplot(target_STFDF[,sample(n.time, 12)],
+  tmpPlot <- stplot(target_STFDF[,sample(n.time, min(n.time, 12))],
                     sp.layout=list("sp.points", dataObs_STFDF@sp))
   print(tmpPlot)
   graphics.off()
