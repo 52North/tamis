@@ -486,8 +486,8 @@ if (TT & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
   #      file="preDefModel.RData")
 }
 
-model_diagnostics <- "model_diagnostics.png"
-png(file = model_diagnostics)#TODO vielleicht mehr parameter wie groesse etc
+modelDiagnostics <- "modelDiagnostics.png"
+png(file = modelDiagnostics)#TODO vielleicht mehr parameter wie groesse etc
 
 par(mfrow=c(2,2))
 plot(lmMod)
@@ -551,12 +551,12 @@ graphics.off()
 
 # wps.out: relations, png;
 
-model_prediction <- "model_prediction.csv"
+modelPrediction <- "modelPrediction.csv"
 if(is.na(singleInputNiederschlagPred) & is.na(singleInputFuellstandPred)) {
   write.csv(cbind(niederschlagPred$observationData@result$phenomenonTime[!is.na(mIds)],
-                  df), file = model_prediction)
+                  df), file = modelPrediction)
 } else {
-  write.csv(df, file = model_prediction)
+  write.csv(df, file = modelPrediction)
 }
 
 # wps.out: modelPrediction, csv;

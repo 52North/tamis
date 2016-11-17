@@ -76,8 +76,8 @@ predDf$fillLevel <- lstTSDf$fillLevel + 0:diffHours*diffFillLevel/diffHours
 
 predDf$predVar <- predict(lmMod, predDf)
 
-model_prediction <- "model_prediction.csv"
-write.csv(predDf, file = model_prediction)
+modelPrediction <- "modelPrediction.csv"
+write.csv(predDf, file = modelPrediction)
 
 # wps.out: modelPrediction, csv;
 

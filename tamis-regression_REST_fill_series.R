@@ -163,8 +163,8 @@ if (sum(!is.na(df$targetVar)) < 10) {
   lmMod <- lm(targetVar ~ fillLevel + precip, df)
 }
 
-model_diagnostics <- "model_diagnostics.png"
-png(file = model_diagnostics)#TODO vielleicht mehr parameter wie groesse etc
+modelDiagnostics <- "modelDiagnostics.png"
+png(file = modelDiagnostics)#TODO vielleicht mehr parameter wie groesse etc
 
 par(mfrow=c(2,2))
 plot(lmMod)
@@ -222,14 +222,14 @@ df$res <- df$targetVar
 df$res[is.na(df$res)] <- df$predVar[is.na(df$res)]
 
 
-# wps.out: model_diagnostics, png;
+# wps.out: modelDiagnostics, png;
 
 # wps.out: relations, png;
 
-model_prediction <- "model_prediction.csv"
-write.csv(df[,c(1,2,3,6)], file = model_prediction)
+modelPrediction <- "modelPrediction.csv"
+write.csv(df[,c(1,2,3,6)], file = modelPrediction)
 
-# wps.out: model_prediction, csv;
+# wps.out: modelPrediction, csv;
 
 ##### json
 
