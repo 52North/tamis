@@ -156,8 +156,10 @@ df <- df[apply(df,1, function(x) !any(is.na(x[c("precip", "fillLevel")]))),]
 
 # modelling
 
+# wps.res: /tmp/gitRepositories/preDefTSModel.RData;
+
 if (sum(!is.na(df$targetVar)) < 10) {
-  load("preDefTSModel.RData")
+  # load("preDefTSModel.RData")
   lmMod <- modList[[tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1)]]
 } else {
   lmMod <- lm(targetVar ~ fillLevel + precip, df)

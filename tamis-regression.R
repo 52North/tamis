@@ -441,9 +441,12 @@ niederschlagPredVec[niederschlagPredVec > 200] <- NA
 
 targetVec <- targetObs_STFDF@data[[1]]
 
+
+# wps.res: /tmp/gitRepositories/preDefTSModel.RData;
+
 if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
                               is.na(sosInputNiederschlag))))) {
-  load("preDefModel.RData")
+  # load("preDefModel.RData")
   lmMod <- switch(targetBreakUp[["featureOfInterest"]][2],
                   'Bever-Talsperre_MQA1_Piezometer_Wasserseite_Schuettkoerper' = MQA1mod,
                   'Bever-Talsperre_MQA3_Piezometer_Luftseite' = MQA3mod,
@@ -455,7 +458,7 @@ if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
 }
 if (TT & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
                                      is.na(sosInputNiederschlag))))) {
-  load("preDefModel.RData")
+  # load("preDefModel.RData")
   lmMod <- switch(targetBreakUp[["procedure"]][2],
                   'WaterLevelE10006' = E10006,
                   'WaterLevelE10013' = E10013,
