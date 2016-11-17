@@ -100,7 +100,7 @@ df <- df[apply(df,1, function(x) !any(is.na(x))),]
 
 # modelling
 
-# wps.res: /tmp/gitRepositories/preDefTSModel.RData;
+# wps.res: /tmp/gitrepositories/preDefTSModel.RData;
 
 
 if (sum(!is.na(df$targetVar)) < 10) {

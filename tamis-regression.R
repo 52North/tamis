@@ -442,7 +442,7 @@ niederschlagPredVec[niederschlagPredVec > 200] <- NA
 targetVec <- targetObs_STFDF@data[[1]]
 
 
-# wps.res: /tmp/gitRepositories/preDefTSModel.RData;
+# wps.res: /tmp/gitrepositories/preDefTSModel.RData;
 
 if (WV & (length(times) < 10 | any(c(is.na(sosInputFuellstand),
                               is.na(sosInputNiederschlag))))) {
