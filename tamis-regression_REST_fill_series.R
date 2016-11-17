@@ -14,7 +14,7 @@
 
 # wps.in: timespan, string, timespan of reference period, 
 # abstract = timeseries URI for the target variable,
-# value = "2016-01-01T/2016-02-29TZ";
+# value = "2016-11-11T/2016-11-16TZ";
 
 #################################
 
@@ -44,9 +44,9 @@
 timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/444"
+timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
 
-timespan <- "2016-01-01T/2016-02-29TZ"
+timespan <- "2016-11-11T/2016-11-16TZ"
 # wps.on;
 
 library(RCurl)
