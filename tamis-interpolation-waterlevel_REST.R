@@ -242,7 +242,7 @@ targetData <- NULL
 targetVar <- NULL
 
 for (day in 1:n.time) {
-  pred <- krige(resid ~ 1, dataObs_STSDF[,day], target)#, model=fitVgm)@data
+  pred <- krige(resid ~ 1, dataObs_STSDF[,day], target, model=fitVgm)@data
   targetData <- cbind(targetData, pred$var1.pred)
   targetVar <- cbind(targetVar, pred$var1.var)
 }

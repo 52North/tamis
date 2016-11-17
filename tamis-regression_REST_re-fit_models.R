@@ -117,7 +117,13 @@ tsIDs <- c(444, # SWD1.1L
            511, # SWD1.1W
            512, # SWD1L
            517, # SWD2A
-           518) # SWD3A
+           518, # SWD3A
+           451, # S1:  
+           452, # S2:  
+           453, # S2A: 
+           454, # S2B: 
+           455, # S3:  
+           450) # S4:  
 
 modList <- NULL
 
