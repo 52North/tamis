@@ -99,11 +99,12 @@ df$targetVar <- targetVar@data[match(joinTimeStamps, time(targetVar)),1]
 df <- df[apply(df,1, function(x) !any(is.na(x))),]
 
 # modelling
-# wps.resource: ./;
+
+# wps.res: preDefTSModel.RData;
 
 
 if (sum(!is.na(df$targetVar)) < 10) {
-  load("preDefTSModel.RData")
+  # load("preDefTSModel.RData")
   lmMod <- modList[[tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1)]]
 } else {
   lmMod <- lm(targetVar ~ fillLevel + precip, df)
