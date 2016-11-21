@@ -164,3 +164,5 @@ print(p4, position=c(0,0,0.5,0.5), more=T)
 print(p3, position=c(0.5,0,1,0.5))
 
 graphics.off()
+
+modelQuality <- findInterval(summary(lmMod)$adj.r.squared,c(0,1/3,2/3,1))

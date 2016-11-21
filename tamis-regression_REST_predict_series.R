@@ -47,6 +47,8 @@ source("tamis-regression-common.R")
 
 # wps.on;
 
+# wps.out: modelQuality, double;
+
 # wps.out: modelDiagnostics, png;
 
 # wps.out: relations, png;

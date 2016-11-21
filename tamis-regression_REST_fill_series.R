@@ -166,6 +166,9 @@ if (sum(!is.na(df$targetVar)) < 10) {
   lmMod <- lm(targetVar ~ fillLevel + precip, df)
 }
 
+modelQuality <- findInterval(summary(lmMod)$adj.r.squared,c(0,1/3,2/3,1))
+# wps.out: modelQuality, double;
+
 modelDiagnostics <- "modelDiagnostics.png"
 png(file = modelDiagnostics)#TODO vielleicht mehr parameter wie groesse etc
 
