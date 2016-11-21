@@ -106,11 +106,17 @@ writeLines(toJSON(targetJsonMeta), metaJson)
 
 # wps.out: metaJson, json; 
 
-targetDataJson <- list(id=list(values=predDf[,c(1,4)]))
-names(targetDataJson) <- rndIdInst
+# targetDataJson <- list(id=list(values=predDf[,c(1,4)]))
+# names(targetDataJson) <- rndIdInst
+
+# dataJson <- "dataJson.json"
+# writeLines(toJSON(targetDataJson), dataJson)
 
 dataJson <- "dataJson.json"
-writeLines(toJSON(targetDataJson), dataJson)
+writeLines(paste("{\"values\": [",
+                 paste(paste(paste("{\"timestamp\":", as.numeric(predDf[,"time"])*1000, sep=""),
+                             paste("\"value\":", predDf[,"predVar"],"}"), sep=","), collapse=","), "]}"),
+           dataJson)
 
 # wps.out: dataJson, json;
 

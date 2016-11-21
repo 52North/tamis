@@ -159,7 +159,8 @@ df <- df[apply(df,1, function(x) !any(is.na(x[c("precip", "fillLevel")]))),]
 # wps.res: /tmp/gitrepositories/preDefTSModel.RData;
 
 if (sum(!is.na(df$targetVar)) < 10) {
-  load("/tmp/gitrepositories/preDefTSModel.RData")
+  # load("/tmp/gitrepositories/preDefTSModel.RData")
+  load("preDefTSModel.RData")
   lmMod <- modList[[tail(strsplit(timeseriesZielvariable,"/", fixed=T)[[1]],1)]]
 } else {
   lmMod <- lm(targetVar ~ fillLevel + precip, df)
@@ -257,12 +258,14 @@ writeLines(toJSON(targetJsonMeta), metaJson)
 
 # wps.out: metaJson, json; 
 
-targetDataJson <- list(id=list(values=df[,c(1,6)]))
-names(targetDataJson) <- rndIdInst
+# targetDataJson <- list(id=list(values=df[,c(1,6)]))
+# names(targetDataJson) <- rndIdInst
 
 dataJson <- "dataJson.json"
-writeLines(toJSON(targetDataJson), dataJson)
-
+writeLines(paste("{\"values\": [",
+                 paste(paste(paste("{\"timestamp\":", as.numeric(df[,1])*1000, sep=""),
+                             paste("\"value\":", df[,6],"}"), sep=","), collapse=","), "]}"),
+           dataJson)
 # wps.out: dataJson, json;
 
 # # wps.off;
