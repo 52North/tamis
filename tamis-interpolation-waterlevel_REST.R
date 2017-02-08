@@ -81,19 +81,22 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 
-timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/475 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/477 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482"
-timespan <-  "2016-01-01T/2016-09-30TZ"
-target <- "geotiff.tiff" 
+timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482"
+  # "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/475 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/477 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482"
+timespan <-  "2016-08-06T13:44:33.471Z/2017-02-06T14:44:33.471Z"
+target <- "https://raw.githubusercontent.com/52North/tamis/master/geotiff.tiff"
 
 # wps.on;
 
 isGrid <- FALSE
 
-fileType <- tail(strsplit(target,split =  ".", fixed = T)[[1]],1)
+download.file(target, "tmpTiff.tiff", mode = "wb")
+target <- "tmpTiff.tiff"
+fileType <- tail(strsplit(target, split =  ".", fixed = T)[[1]],1)
 
 if (fileType == "tiff" | fileType == "tif") {
   isGrid <-TRUE
-  target <- readGDAL(target)
+  target <- readGDAL("tmpTiff.tiff")
   target <- as(target,"SpatialPointsDataFrame")
 } else {
   library(rgeos)
@@ -188,7 +191,7 @@ n.time <- length(dataObs_STFDF@time)
 
 dataPos <- "dataPos.png"
 png(file = dataPos)
-tmpDataPos <- stplot(dataObs_STFDF[,1:min(12, n.time)])
+tmpDataPos <- stplot(dataObs_STFDF[,1:min(12, n.time), drop=F])
 print(tmpDataPos)
 graphics.off()
 
@@ -261,12 +264,12 @@ for (i in 1:24) { # i <- 1
 
 n.plots <- min(12,n.time)
 
-p1 <- spplot(target[,1:n.plots],
-             sp.layout=list("sp.points",
-                            dataObs_STSDF@sp,
-                            col="black"),
-             strip=strip.custom(factor.levels=as.character(as.Date(index(dataObs_STSDF@time)))[1:n.plots]),
-             as.table=T)
+# p1 <- spplot(target[,1:n.plots],
+#              sp.layout=list("sp.points",
+#                             dataObs_STSDF@sp,
+#                             col="black"),
+#              strip=strip.custom(factor.levels=as.character(as.Date(index(dataObs_STSDF@time)))[1:n.plots]),
+#              as.table=T)
 
 # png("IDW_interpolation_series_waterlevel.png", width = 2400, height = 1600, res=200)
 # print(p1)
