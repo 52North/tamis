@@ -346,9 +346,9 @@ if(isGrid) {
   # time
   dim.def.nc(nc, "time", length(target_STFDF@time))
   var.def.nc(nc, "time", "NC_INT", "time")
-  var.put.nc(nc, "time", as.numeric(index(target_STFDF@time)))
+  var.put.nc(nc, "time", as.numeric(index(target_STFDF@time)) - as.numeric(index(target_STFDF@time)[1]))
   
-  att.put.nc(nc, "time", "units", "NC_CHAR", "secs since 1970-01-01 00:00:00")
+  att.put.nc(nc, "time", "units", "NC_CHAR", paste("secs since",  index(target_STFDF@time)[1]))
   att.put.nc(nc, "time", "axis", "NC_CHAR", "t")
   att.put.nc(nc, "time", "calendar", "NC_CHAR", "gregorian")
   att.put.nc(nc, "time", "long_name", "NC_CHAR", "time")
