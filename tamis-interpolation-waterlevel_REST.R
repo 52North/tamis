@@ -241,7 +241,7 @@ graphics.off()
 targetData <- NULL
 targetVar <- NULL
 
-for (day in 1:n.time) { # day <- 1
+for (day in 1:n.time) {
   pred <- krige(resid ~ 1, dataObs_STSDF[,day], target, model=fitVgm)@data
   targetData <- cbind(targetData, pred$var1.pred)
   targetVar <- cbind(targetVar, pred$var1.var)
@@ -346,9 +346,9 @@ if(isGrid) {
   # time
   dim.def.nc(nc, "time", length(target_STFDF@time))
   var.def.nc(nc, "time", "NC_INT", "time")
-  var.put.nc(nc, "time", round(as.numeric(index(target_STFDF@time))/60,0))
+  var.put.nc(nc, "time", as.numeric(index(target_STFDF@time)))
   
-  att.put.nc(nc, "time", "units", "NC_CHAR", "minutes since 1970-01-01")
+  att.put.nc(nc, "time", "units", "NC_CHAR", "secs since 1970-01-01")
   att.put.nc(nc, "time", "axis", "NC_CHAR", "t")
   att.put.nc(nc, "time", "calendar", "NC_CHAR", "gregorian")
   att.put.nc(nc, "time", "long_name", "NC_CHAR", "time")
