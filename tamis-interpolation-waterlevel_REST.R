@@ -81,8 +81,8 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 
-timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/475 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/477 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482"
-timespan <-  "2016-01-01T/2016-09-30TZ"
+timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482"
+timespan <-  "2016-08-06T13:44:33.471Z/2017-02-06T14:44:33.471Z"
 target <- "geotiff.tiff" 
 
 # wps.on;
@@ -253,20 +253,20 @@ gridded(target) <- TRUE
 linModPred <- predict(linMod, as.data.frame(target@coords))
 target@data <- cbind(target@data, linModPred)
 
-for (i in 1:24) { # i <- 1
+for (i in 1:((ncol(target@data)-1)/2)) { # i <- 1
   target@data[,i] <- linModPred + target@data[,i]
 }
 
 # updateStatus("Interpolation of residuls has been performed.")
 
-n.plots <- min(12,n.time)
-
-p1 <- spplot(target[,1:n.plots],
-             sp.layout=list("sp.points",
-                            dataObs_STSDF@sp,
-                            col="black"),
-             strip=strip.custom(factor.levels=as.character(as.Date(index(dataObs_STSDF@time)))[1:n.plots]),
-             as.table=T)
+# n.plots <- min(12,n.time)
+# 
+# p1 <- spplot(target[,1:n.plots],
+#              sp.layout=list("sp.points",
+#                             dataObs_STSDF@sp,
+#                             col="black"),
+#              strip=strip.custom(factor.levels=as.character(as.Date(index(dataObs_STSDF@time)))[1:n.plots]),
+#              as.table=T)
 
 # png("IDW_interpolation_series_waterlevel.png", width = 2400, height = 1600, res=200)
 # print(p1)
@@ -346,9 +346,9 @@ if(isGrid) {
   # time
   dim.def.nc(nc, "time", length(target_STFDF@time))
   var.def.nc(nc, "time", "NC_INT", "time")
-  var.put.nc(nc, "time", 1:length(target_STFDF@time))
+  var.put.nc(nc, "time", as.numeric(index(target_STFDF@time)))
   
-  att.put.nc(nc, "time", "units", "NC_CHAR", paste("days since", index(target_STFDF@time)[1]) )
+  att.put.nc(nc, "time", "units", "NC_CHAR", "seconds since 1970-01-01")
   att.put.nc(nc, "time", "axis", "NC_CHAR", "t")
   att.put.nc(nc, "time", "calendar", "NC_CHAR", "gregorian")
   att.put.nc(nc, "time", "long_name", "NC_CHAR", "time")
