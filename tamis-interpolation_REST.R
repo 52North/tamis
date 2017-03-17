@@ -6,7 +6,7 @@
 
 # wps.in: timespan, string, timespan of input data, 
 # abstract = timeseries URI for the interpolation variable,
-# value = "2016-01-01T/2016-01-07TZ";
+# value = "2016-01-01T/2016-01-14TZ";
 
 # wps.in: target, type = geotiff, 
 # abstract = geotiff defining the interpolation grid (only non NAs will be interpolated),
