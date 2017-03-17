@@ -16,11 +16,11 @@
 # abstract = timeseries Id for the target variable,
 # value = "2016-01-01T/2016-02-29TZ";
 
-# wps.in: singleInputNiederschlag, integer, single value, 
+# wps.in: singleInputNiederschlag, double, single value, 
 # abstract = single value for prediction values: Niederschlag,
 # value = 145;
 
-# wps.in: singleInputFuellstand, integer, single value, 
+# wps.in: singleInputFuellstand, double, single value, 
 # abstract = single value for prediction values: Fuellstand,
 # value = 292;
 
