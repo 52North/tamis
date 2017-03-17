@@ -61,8 +61,14 @@ source("tamis-regression-common.R")
 
 # hourly 
 lstTSDf <- tail(df,1)
-singleInputZeitstempel <- as.POSIXct(singleInputZeitstempel,
-                                      format="%Y-%m-%dT%H:%M:%SZ")
+singleInputZeitstempelSeconds <- as.POSIXct(singleInputZeitstempel,
+                                     format="%Y-%m-%dT%H:%M:%SZ")
+if (is.na(singleInputZeitstempelSeconds)){
+  singleInputZeitstempel <- as.POSIXct(singleInputZeitstempel,
+                                       format="%Y-%m-%dT%H:%M:%OSZ")
+}else{
+  singleInputZeitstempel <- singleInputZeitstempelSeconds
+}
 diffHours <- ceiling((as.numeric(singleInputZeitstempel) - as.numeric(lstTSDf$time))/3600)
 diffFillLevel <- singleInputFuellstand - lstTSDf$fillLevel
 
