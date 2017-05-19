@@ -187,12 +187,11 @@ dataObs_STFDF@sp@proj4string <- CRS("+init=epsg:4326")
 n.time <- length(dataObs_STFDF@time)
 
 dataPos <- "dataPos.png"
+
 png(file = dataPos)
 tmpDataPos <- stplot(dataObs_STFDF[,1:min(12, n.time)])
 print(tmpDataPos)
 graphics.off()
-
-dataObs_STFDF@sp
 
 # wps.out: dataPos, png;
 
@@ -269,19 +268,6 @@ for (i in 1:((ncol(target@data)-1)/2)) { # i <- 1
 }
 
 # updateStatus("Interpolation of residuls has been performed.")
-
-# n.plots <- min(12,n.time)
-# 
-# p1 <- spplot(target[,1:n.plots],
-#              sp.layout=list("sp.points",
-#                             dataObs_STSDF@sp,
-#                             col="black"),
-#              strip=strip.custom(factor.levels=as.character(as.Date(index(dataObs_STSDF@time)))[1:n.plots]),
-#              as.table=T)
-
-# png("IDW_interpolation_series_waterlevel.png", width = 2400, height = 1600, res=200)
-# print(p1)
-# dev.off()
 
 if(isGrid) {
   predictions <- "predictions.tiff"
@@ -389,6 +375,9 @@ if(isGrid) {
   epsgNum <- as.numeric(showEPSG(target_STFDF@sp@proj4string@projargs))
   
   var.def.nc(nc, "crs", "NC_INT", NA)
+  att.put.nc(nc, "crs", "missing_value", "NC_INT", 0)
+  if(is.na(epsgNum))
+    epsgNum <- 0
   var.put.nc(nc, "crs", epsgNum)
   att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", paste("EPSG", epsgNum, sep=":"))
   att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", target_STFDF@sp@proj4string@projargs)
@@ -422,3 +411,5 @@ if(isGrid) {
   close.nc(nc)
 }
 # wps.out: ncFile, netcdf;
+
+cat(Sys.time(), "\n")

@@ -211,14 +211,18 @@ if(isGrid) {
   
   target_STFDF <- STFDF(geometry(target_fullGrid),
                         dataObs_STFDF@time, 
-                        data.frame(var1.pred = unlist(target_fullGrid@data[,1:(ncol(target_fullGrid)/2)]),
-                                   var1.var = unlist(target_fullGrid@data[,-(1:(ncol(target_fullGrid)/2))])),
-                        index(dataObs_STFDF@time)+24*3600)
-
+                        data.frame(var1.pred = unlist(target_fullGrid@data[, 1:n.time]),
+                                   var1.var = unlist(target_fullGrid@data[, 1:n.time + n.time])),
+                        if(length(index(dataObs_STFDF@time)) > 1) {
+                          delta(dataObs_STFDF@time)
+                        } else {
+                          index(dataObs_STFDF@time)
+                        })
+  
   # wps output
   predMap <- "predMap.png"
   png(file = predMap)
-  tmpPlot <- stplot(target_STFDF[,sample(n.time, min(n.time, 12))],
+  tmpPlot <- stplot(target_STFDF[,sort(sample(n.time, min(n.time,12)))],
                     sp.layout=list("sp.points", dataObs_STFDF@sp))
   print(tmpPlot)
   graphics.off()
@@ -230,42 +234,67 @@ if(isGrid) {
   
   nc <- create.nc(ncFile, prefill = FALSE)
   
-  # x
-  dim.def.nc(nc, "x", target_STFDF@sp@grid@cells.dim[1])
-  var.def.nc(nc, "x", "NC_DOUBLE", "x")
-  var.put.nc(nc, "x", unique(target_STFDF@sp@coords[,"x"]))
-  
-  att.put.nc(nc, "x", "units", "NC_CHAR", "meter")
-  att.put.nc(nc, "x", "axis", "NC_CHAR", "x")
-  att.put.nc(nc, "x", "long_name", "NC_CHAR", "x")
-  att.put.nc(nc, "x", "standard_name", "NC_CHAR", "projection_x_coordinate")
-  
-  # y
-  dim.def.nc(nc, "y", target_STFDF@sp@grid@cells.dim[2])
-  var.def.nc(nc, "y", "NC_DOUBLE", "y")
-  var.put.nc(nc, "y", unique(target_STFDF@sp@coords[,"y"]))
-  
-  att.put.nc(nc, "y", "units", "NC_CHAR", "meter")
-  att.put.nc(nc, "y", "axis", "NC_CHAR", "y")
-  att.put.nc(nc, "y", "long_name", "NC_CHAR", "y")
-  att.put.nc(nc, "y", "standard_name", "NC_CHAR", "projection_y_coordinate")
+  if (is.projected(target_STFDF@sp)) {
+    # x
+    dim.def.nc(nc, "x", target_STFDF@sp@grid@cells.dim[1])
+    var.def.nc(nc, "x", "NC_DOUBLE", "x")
+    var.put.nc(nc, "x", unique(target_STFDF@sp@coords[,"x"]))
+    
+    att.put.nc(nc, "x", "units", "NC_CHAR", "meter")
+    att.put.nc(nc, "x", "axis", "NC_CHAR", "x")
+    att.put.nc(nc, "x", "long_name", "NC_CHAR", "x")
+    att.put.nc(nc, "x", "standard_name", "NC_CHAR", "projection_x_coordinate")
+    
+    # y
+    dim.def.nc(nc, "y", target_STFDF@sp@grid@cells.dim[2])
+    var.def.nc(nc, "y", "NC_DOUBLE", "y")
+    var.put.nc(nc, "y", unique(target_STFDF@sp@coords[,"y"]))
+    
+    att.put.nc(nc, "y", "units", "NC_CHAR", "meter")
+    att.put.nc(nc, "y", "axis", "NC_CHAR", "y")
+    att.put.nc(nc, "y", "long_name", "NC_CHAR", "y")
+    att.put.nc(nc, "y", "standard_name", "NC_CHAR", "projection_y_coordinate")
+  } else {
+    # lon
+    dim.def.nc(nc, "lon", target_STFDF@sp@grid@cells.dim[1])
+    var.def.nc(nc, "lon", "NC_DOUBLE", "lon")
+    var.put.nc(nc, "lon", unique(target_STFDF@sp@coords[,1]))
+    
+    att.put.nc(nc, "lon", "units", "NC_CHAR", "degree_east")
+    att.put.nc(nc, "lon", "axis", "NC_CHAR", "lon")
+    att.put.nc(nc, "lon", "long_name", "NC_CHAR", "longitude")
+    
+    # lat
+    dim.def.nc(nc, "lat", target_STFDF@sp@grid@cells.dim[2])
+    var.def.nc(nc, "lat", "NC_DOUBLE", "lat")
+    var.put.nc(nc, "lat", unique(target_STFDF@sp@coords[,2]))
+    
+    att.put.nc(nc, "lat", "units", "NC_CHAR", "degree_north")
+    att.put.nc(nc, "lat", "axis", "NC_CHAR", "lat")
+    att.put.nc(nc, "lat", "long_name", "NC_CHAR", "latitude")
+  }
   
   # time
   dim.def.nc(nc, "time", length(target_STFDF@time))
   var.def.nc(nc, "time", "NC_INT", "time")
-  var.put.nc(nc, "time", 1:length(target_STFDF@time))
+  var.put.nc(nc, "time", as.numeric(index(target_STFDF@time)) - as.numeric(index(target_STFDF@time)[1]))
   
-  att.put.nc(nc, "time", "units", "NC_CHAR", paste("days since", index(target_STFDF@time)[1]) )
+  att.put.nc(nc, "time", "units", "NC_CHAR", paste("secs since",  index(target_STFDF@time)[1]))
   att.put.nc(nc, "time", "axis", "NC_CHAR", "t")
   att.put.nc(nc, "time", "calendar", "NC_CHAR", "gregorian")
   att.put.nc(nc, "time", "long_name", "NC_CHAR", "time")
   att.put.nc(nc, "time", "standard_name", "NC_CHAR", "time")
   
   # CRS
+  epsgNum <- as.numeric(showEPSG(target_STFDF@sp@proj4string@projargs))
+  
   var.def.nc(nc, "crs", "NC_INT", NA)
-  var.put.nc(nc, "crs", 31466)
-  att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", "EPSG:31466")
-  att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", "+proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs")
+  att.put.nc(nc, "crs", "missing_value", "NC_INT", 0)
+  if(is.na(epsgNum))
+    epsgNum <- 0
+  var.put.nc(nc, "crs", epsgNum)
+  att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", paste("EPSG", epsgNum, sep=":"))
+  att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", target_STFDF@sp@proj4string@projargs)
   
   obsProp <- colnames(dataObs_STFDF@data)[1]
   
@@ -276,7 +305,7 @@ if(isGrid) {
   
   UncertML <- list(var1.pred = "http://www.uncertml.org/distributions/normal#mean",
                    var1.var = "http://www.uncertml.org/distributions/normal#variance")
-
+  
   for (var.name in colnames(target_STFDF@data)) {
     varname <- gsub(".","", var.name, fixed=TRUE)
     var.def.nc(nc, varname, "NC_DOUBLE", dimensions = c(2,1,0))
@@ -296,3 +325,5 @@ if(isGrid) {
   close.nc(nc)
 }
 # wps.out: ncFile, netcdf;
+
+cat(Sys.time(), "\n")
