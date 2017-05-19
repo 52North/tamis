@@ -165,15 +165,15 @@ targetVar <- NULL
 
 if (n.time >= 10) {
   for (day in 1:n.time) {
-    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm)@data
-    targetData <- cbind(targetData, pred$var1.pred)
-    targetVar <- cbind(targetVar, pred$var1.var)
+    pred <- krige0(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm, computeVar = T)
+    targetData <- cbind(targetData, pred$pred)
+    targetVar <- cbind(targetVar, pred$var)
   }
 } else {
   for (day in 1:n.time) {
-    pred <- krige(Schuettmenge ~ 1, dataObs_STFDF[,day], target)@data # , model=fitVgm
-    targetData <- cbind(targetData, pred$var1.pred)
-    targetVar <- cbind(targetVar, pred$var1.var)
+    pred <- idw0(Schuettmenge ~ 1, dataObs_STFDF[,day], target)
+    targetData <- cbind(targetData, pred)
+    targetVar <- cbind(targetVar, rep(NA, length(pred)))
   }
 }
 

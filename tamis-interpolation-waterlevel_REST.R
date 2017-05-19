@@ -6,7 +6,7 @@
 
 # wps.in: timespan, string, timespan of input data, 
 # abstract = timeseries URI for the interpolation variable,
-# value = "2016-01-01T/2016-09-30TZ";
+# value = "2017-01-01T/2017-04-30TZ";
 
 # wps.in: target, type = geotiff, 
 # abstract = geotiff defining the interpolation grid (only non NAs will be interpolated),
@@ -192,11 +192,13 @@ tmpDataPos <- stplot(dataObs_STFDF[,1:min(12, n.time)])
 print(tmpDataPos)
 graphics.off()
 
+dataObs_STFDF@sp
+
 # wps.out: dataPos, png;
 
 dataTS <- "dataTS.png"
 png(file = dataTS)
-tmpDataTS <- stplot(dataObs_STFDF[c("MQB4", "MQB5", "MQB6", "MQB7"),, "Wasserstand", drop=F], mode="ts")
+tmpDataTS <- stplot(dataObs_STFDF[,, "Wasserstand", drop=F], mode="ts")
 print(tmpDataTS)
 graphics.off()
 
@@ -209,12 +211,12 @@ colnames(dataObs_STFDF@sp@coords) <- c("x","y")
 
 dataObs_STSDF <- as(dataObs_STFDF, "STSDF")
 
-linMod <- lm(Wasserstand ~ x+y, as(dataObs_STSDF[,,drop=F], "data.frame"))
+linMod <- lm(Wasserstand ~ x+y, as(dataObs_STSDF[,,drop=F], "data.frame"), na.action = na.omit)
 summary(linMod)
 
 dataObs_STSDF@data$resid <- linMod$residuals
 
-empVgm <- variogram(resid ~ 1, dataObs_STSDF, tlags=0, na.omit = TRUE, cutoff=50)
+empVgm <- variogram(resid ~ 1, dataObs_STSDF, tlags=0, na.omit = TRUE)
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
 
@@ -241,10 +243,19 @@ graphics.off()
 targetData <- NULL
 targetVar <- NULL
 
-for (day in 1:n.time) {
-  pred <- krige(resid ~ 1, dataObs_STSDF[,day], target, model=fitVgm)@data
-  targetData <- cbind(targetData, pred$var1.pred)
-  targetVar <- cbind(targetVar, pred$var1.var)
+
+if (n.time >= 10) {
+  for (day in 1:n.time) { # day <- 1
+    pred <- krige(resid ~ 1, dataObs_STSDF[,day], target, model=fitVgm)@data
+    targetData <- cbind(targetData, pred$var1.pred)
+    targetVar <- cbind(targetVar, pred$var1.var)
+  }
+} else {
+   for (day in 1:n.time) { # day <- 1
+     pred <- krige(resid ~ 1, dataObs_STSDF[,day], target)@data
+     targetData <- cbind(targetData, pred$var1.pred)
+     targetVar <- cbind(targetVar, pred$var1.var)
+   }
 }
 
 target <- addAttrToGeom(geometry(target), as.data.frame(cbind(targetData, targetVar)))
@@ -323,25 +334,45 @@ if(isGrid) {
   
   nc <- create.nc(ncFile, prefill = FALSE)
   
-  # x
-  dim.def.nc(nc, "x", target_STFDF@sp@grid@cells.dim[1])
-  var.def.nc(nc, "x", "NC_DOUBLE", "x")
-  var.put.nc(nc, "x", unique(target_STFDF@sp@coords[,"x"]))
-  
-  att.put.nc(nc, "x", "units", "NC_CHAR", "meter")
-  att.put.nc(nc, "x", "axis", "NC_CHAR", "x")
-  att.put.nc(nc, "x", "long_name", "NC_CHAR", "x")
-  att.put.nc(nc, "x", "standard_name", "NC_CHAR", "projection_x_coordinate")
-  
-  # y
-  dim.def.nc(nc, "y", target_STFDF@sp@grid@cells.dim[2])
-  var.def.nc(nc, "y", "NC_DOUBLE", "y")
-  var.put.nc(nc, "y", unique(target_STFDF@sp@coords[,"y"]))
-  
-  att.put.nc(nc, "y", "units", "NC_CHAR", "meter")
-  att.put.nc(nc, "y", "axis", "NC_CHAR", "y")
-  att.put.nc(nc, "y", "long_name", "NC_CHAR", "y")
-  att.put.nc(nc, "y", "standard_name", "NC_CHAR", "projection_y_coordinate")
+  if (is.projected(target_STFDF@sp)) {
+    # x
+    dim.def.nc(nc, "x", target_STFDF@sp@grid@cells.dim[1])
+    var.def.nc(nc, "x", "NC_DOUBLE", "x")
+    var.put.nc(nc, "x", unique(target_STFDF@sp@coords[,"x"]))
+    
+    att.put.nc(nc, "x", "units", "NC_CHAR", "meter")
+    att.put.nc(nc, "x", "axis", "NC_CHAR", "x")
+    att.put.nc(nc, "x", "long_name", "NC_CHAR", "x")
+    att.put.nc(nc, "x", "standard_name", "NC_CHAR", "projection_x_coordinate")
+
+    # y
+    dim.def.nc(nc, "y", target_STFDF@sp@grid@cells.dim[2])
+    var.def.nc(nc, "y", "NC_DOUBLE", "y")
+    var.put.nc(nc, "y", unique(target_STFDF@sp@coords[,"y"]))
+    
+    att.put.nc(nc, "y", "units", "NC_CHAR", "meter")
+    att.put.nc(nc, "y", "axis", "NC_CHAR", "y")
+    att.put.nc(nc, "y", "long_name", "NC_CHAR", "y")
+    att.put.nc(nc, "y", "standard_name", "NC_CHAR", "projection_y_coordinate")
+  } else {
+    # lon
+    dim.def.nc(nc, "lon", target_STFDF@sp@grid@cells.dim[1])
+    var.def.nc(nc, "lon", "NC_DOUBLE", "lon")
+    var.put.nc(nc, "lon", unique(target_STFDF@sp@coords[,1]))
+    
+    att.put.nc(nc, "lon", "units", "NC_CHAR", "degree_east")
+    att.put.nc(nc, "lon", "axis", "NC_CHAR", "lon")
+    att.put.nc(nc, "lon", "long_name", "NC_CHAR", "longitude")
+    
+    # lat
+    dim.def.nc(nc, "lat", target_STFDF@sp@grid@cells.dim[2])
+    var.def.nc(nc, "lat", "NC_DOUBLE", "lat")
+    var.put.nc(nc, "lat", unique(target_STFDF@sp@coords[,2]))
+    
+    att.put.nc(nc, "lat", "units", "NC_CHAR", "degree_north")
+    att.put.nc(nc, "lat", "axis", "NC_CHAR", "lat")
+    att.put.nc(nc, "lat", "long_name", "NC_CHAR", "latitude")
+  }
   
   # time
   dim.def.nc(nc, "time", length(target_STFDF@time))
@@ -355,10 +386,12 @@ if(isGrid) {
   att.put.nc(nc, "time", "standard_name", "NC_CHAR", "time")
   
   # CRS
+  epsgNum <- as.numeric(showEPSG(target_STFDF@sp@proj4string@projargs))
+  
   var.def.nc(nc, "crs", "NC_INT", NA)
-  var.put.nc(nc, "crs", 31466)
-  att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", "EPSG:31466")
-  att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", "+proj=tmerc +lat_0=0 +lon_0=6 +k=1 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs")
+  var.put.nc(nc, "crs", epsgNum)
+  att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", paste("EPSG", epsgNum, sep=":"))
+  att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", target_STFDF@sp@proj4string@projargs)
   
   obsProp <- colnames(dataObs_STFDF@data)[1]
   
