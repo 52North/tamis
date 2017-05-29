@@ -102,8 +102,8 @@ readTSmeta <- function(ts_URI, .opts, ...) {
 
 source("~/52North/secOpts.R")
 
-precip <- readTSdata(timeseriesNiederschlag, timespan)
-fillLevel <- readTSdata(timeseriesFuellstand, timespan)
+precip <- readTSdata(timeseriesNiederschlag, timespan, .opts)
+fillLevel <- readTSdata(timeseriesFuellstand, timespan, .opts)
 targetVar <- readTSdata(ts_URI = timeseriesZielvariable, timespan, .opts)
 
 as.POSIXct(1477263600, origin="1970-01-01 00:00:00")
