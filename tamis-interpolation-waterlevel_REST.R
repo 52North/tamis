@@ -29,8 +29,9 @@ library(RCurl)
 
 # updateStatus("helper functions")
 
+
 readTSdata <- function(ts_URI, timespan, .opts, ...) {
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     meta <- GET(ts_URI, do.call(config, .opts), ...)
   else
     meta <- GET(ts_URI)
@@ -64,7 +65,7 @@ readTSdata <- function(ts_URI, timespan, .opts, ...) {
 }
 
 readTSmeta <- function(ts_URI, .opts, ...) {
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     meta <- GET(ts_URI, do.call(config, .opts), ...)
   else
     meta <- GET(ts_URI, ...)
@@ -73,8 +74,12 @@ readTSmeta <- function(ts_URI, .opts, ...) {
   fromJSON(meta)
 }
 
-###
-
+checkCredentials <- function(ts_URI, key="sos2-tamis", secOpts=.opts) {
+  if(any(strsplit(ts_URI, "/")[[1]] == key))
+    return(.opts)
+  else
+    return(NULL)
+}
 # updateStatus("Loading secOpts")
 
 source("~/52North/secOpts.R")
@@ -109,7 +114,7 @@ heightCorrection <- TRUE
 
 dataObs_STFDF <- NULL
 for (ts in timeseries) { # ts <- timeseries[3]
-  source <- as(readTSdata(ts, timespan, .opts), "data.frame")
+  source <- as(readTSdata(ts, timespan, checkCredentials(ts)), "data.frame")
   tsId <- tail(strsplit(ts, "/")[[1]],1)
   if (heightCorrection)
     source$Wasserstand.im.Damm <- switch(tsId,
@@ -195,13 +200,11 @@ graphics.off()
 
 # wps.out: dataPos, png;
 
-dataTS <- "dataTS.png"
-png(file = dataTS)
-tmpDataTS <- stplot(dataObs_STFDF[,, "Wasserstand", drop=F], mode="ts")
-print(tmpDataTS)
-graphics.off()
-
-# wps.out: dataTS, png;
+# dataTS <- "dataTS.png"
+# png(file = dataTS)
+# tmpDataTS <- stplot(dataObs_STFDF[,, "Wasserstand", drop=F], mode="ts")
+# print(tmpDataTS)
+# graphics.off()
 
 # updateStatus("Calculate empirical variogram")
 
@@ -411,5 +414,3 @@ if(isGrid) {
   close.nc(nc)
 }
 # wps.out: ncFile, netcdf;
-
-cat(Sys.time(), "\n")

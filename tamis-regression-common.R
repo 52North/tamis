@@ -8,7 +8,7 @@ library(xts)
 library(spacetime)
 
 readTSdata <- function(ts_URI, timespan, .opts, ...) {
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     meta <- GET(ts_URI, do.call(config, .opts), ...)
   else
     meta <- GET(ts_URI)
@@ -17,7 +17,7 @@ readTSdata <- function(ts_URI, timespan, .opts, ...) {
   meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
   meta <- fromJSON(meta)
   
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     ts <- GET(paste(ts_URI, "/getData?timespan=", timespan, sep=""), do.call(config, .opts), ...)
   else 
     ts <- GET(paste(ts_URI, "/getData?timespan=", timespan, sep=""))
@@ -42,24 +42,34 @@ readTSdata <- function(ts_URI, timespan, .opts, ...) {
 }
 
 readTSmeta <- function(ts_URI, .opts, ...) {
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     meta <- GET(ts_URI, do.call(config, .opts), ...)
   else
     meta <- GET(ts_URI, ...)
+  
   meta <- memDecompress(meta$content, "none", asChar = T)
   meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
   fromJSON(meta)
 }
 
+checkCredentials <- function(ts_URI, key="sos2-tamis", secOpts=.opts) {
+  if(any(strsplit(ts_URI, "/")[[1]] == key))
+    return(.opts)
+  else
+    return(NULL)
+}
+
 source("~/52North/secOpts.R")
 
-precip <- readTSdata(timeseriesNiederschlag, timespan)
-fillLevel <- readTSdata(timeseriesFuellstand, timespan)
-targetVar <- readTSdata(ts_URI = timeseriesZielvariable, timespan, .opts)
+source("~/52North/secOpts.R")
 
-precipMeta <- readTSmeta(timeseriesNiederschlag)
-fillLevelMeta <- readTSmeta(timeseriesFuellstand)
-targetVarMeta <- readTSmeta(timeseriesZielvariable, .opts)
+precip <- readTSdata(timeseriesNiederschlag, timespan, checkCredentials(timeseriesNiederschlag))
+fillLevel <- readTSdata(timeseriesFuellstand, timespan,checkCredentials(timeseriesFuellstand))
+targetVar <- readTSdata(timeseriesZielvariable, timespan, checkCredentials(timeseriesZielvariable))
+
+precipMeta <- readTSmeta(timeseriesNiederschlag, checkCredentials(timeseriesNiederschlag))
+fillLevelMeta <- readTSmeta(timeseriesFuellstand, checkCredentials(timeseriesFuellstand))
+targetVarMeta <- readTSmeta(timeseriesZielvariable, checkCredentials(timeseriesZielvariable))
 
 # synchronise data sets
 

@@ -7,9 +7,6 @@
 # wps.in: target, type = geotiff, 
 # abstract = URL to a geotiff defining the interpolation grid (only non NAs will be interpolated);
 
-# wps.in: targetSOS, string, SOS, 
-# abstract = target SOS-URL for the output;
-
 as.Spatial.MonitoringPoint <- function(obj, ...) {
   
   .extractCRS <- function(obj) {
@@ -354,8 +351,3 @@ if(isGrid) {
 }
 # wps.out: ncFile, netcdf;
 
-stplot(target_STFDF[,,"var1.pred"])
-
-# wps.off;
-targetSOS <- NA # "https://tamis.dev.52north.org/sos/service"
-# wps.on;

@@ -41,7 +41,7 @@
 # Hier: Verdichtung der Zeitreihen über Niederschlag und Füllhöhe 
 
 # wps.off;
-timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
+timeseriesNiederschlag <- "http://fluggs.wupperverband.de/sos2/api/v1/timeseries/427" # "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
 timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
@@ -57,7 +57,7 @@ library(xts)
 library(spacetime)
 
 readTSdata <- function(ts_URI, timespan, .opts, ...) {
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     meta <- GET(ts_URI, do.call(config, .opts), ...)
   else
     meta <- GET(ts_URI)
@@ -66,7 +66,7 @@ readTSdata <- function(ts_URI, timespan, .opts, ...) {
   meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
   meta <- fromJSON(meta)
   
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     ts <- GET(paste(ts_URI, "/getData?timespan=", timespan, sep=""), do.call(config, .opts), ...)
   else 
     ts <- GET(paste(ts_URI, "/getData?timespan=", timespan, sep=""))
@@ -91,51 +91,33 @@ readTSdata <- function(ts_URI, timespan, .opts, ...) {
 }
 
 readTSmeta <- function(ts_URI, .opts, ...) {
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     meta <- GET(ts_URI, do.call(config, .opts), ...)
   else
     meta <- GET(ts_URI, ...)
+  
   meta <- memDecompress(meta$content, "none", asChar = T)
   meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
   fromJSON(meta)
 }
 
+checkCredentials <- function(ts_URI, key="sos2-tamis", secOpts=.opts) {
+  if(any(strsplit(ts_URI, "/")[[1]] == key))
+    return(.opts)
+  else
+    return(NULL)
+}
+
 source("~/52North/secOpts.R")
 
-precip <- readTSdata(timeseriesNiederschlag, timespan)
-fillLevel <- readTSdata(timeseriesFuellstand, timespan)
-targetVar <- readTSdata(ts_URI = timeseriesZielvariable, timespan, .opts)
+precip <- readTSdata(timeseriesNiederschlag, timespan, checkCredentials(timeseriesNiederschlag))
+fillLevel <- readTSdata(timeseriesFuellstand, timespan, checkCredentials(timeseriesFuellstand))
+targetVar <- readTSdata(timeseriesZielvariable, timespan, checkCredentials(timeseriesZielvariable))
 
-as.POSIXct(1477263600, origin="1970-01-01 00:00:00")
+precipMeta <- readTSmeta(timeseriesNiederschlag, checkCredentials(timeseriesNiederschlag))
+fillLevelMeta <- readTSmeta(timeseriesFuellstand, checkCredentials(timeseriesFuellstand))
+targetVarMeta <- readTSmeta(timeseriesZielvariable, checkCredentials(timeseriesZielvariable))
 
-as.numeric(Sys.Date())
-
-debugonce(readTSdata)
-
-precipMeta <- readTSmeta(timeseriesNiederschlag)
-fillLevelMeta <- readTSmeta(timeseriesFuellstand)
-targetVarMeta <- readTSmeta(timeseriesZielvariable, .opts)
-
-# synchronise data sets
-# 
-# #precipitation
-# precipAgg <- aggregate(precip[1,,drop=F]@data[[1]],
-#                        by = list(sapply(strsplit(as.character(time(precip[1,])),
-#                                                  " ", fixed=T), function(x) x[1])),
-#                        function(x) mean(x, na.rm = T))
-# precipAgg[precipAgg[,2] > 200,2] <- NA
-# colnames(precipAgg) <- colnames(precip@data)
-# precip <- STFDF(precip@sp, as.POSIXct(precipAgg[,1]), precipAgg[,2,drop=F])
-# 
-# # fill level
-# fillLevelAgg <- aggregate(fillLevel[1,,drop=F]@data[[1]],
-#                           by = list(sapply(strsplit(as.character(time(fillLevel[1,])),
-#                                                     " ", fixed=T), function(x) x[1])),
-#                           function(x) mean(x, na.rm = T))
-# colnames(fillLevelAgg) <- colnames(fillLevel@data)
-# fillLevel <- STFDF(fillLevel@sp, as.POSIXct(fillLevelAgg[,1]), fillLevelAgg[,2,drop=F])
-# 
-# target
 targetVarAgg <- aggregate(targetVar[1,,drop=F]@data[[1]],
                           by = list(sapply(strsplit(as.character(time(targetVar[1,])),
                                                     " ", fixed=T), function(x) x[1])),

@@ -29,7 +29,7 @@ library(RCurl)
 # updateStatus("helper functions")
 
 readTSdata <- function(ts_URI, timespan, .opts, ...) {
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     meta <- GET(ts_URI, do.call(config, .opts), ...)
   else
     meta <- GET(ts_URI)
@@ -63,13 +63,20 @@ readTSdata <- function(ts_URI, timespan, .opts, ...) {
 }
 
 readTSmeta <- function(ts_URI, .opts, ...) {
-  if(!missing(.opts))
+  if(!missing(.opts) & !is.null(.opts))
     meta <- GET(ts_URI, do.call(config, .opts), ...)
   else
     meta <- GET(ts_URI, ...)
   meta <- memDecompress(meta$content, "none", asChar = T)
   meta <- substr(meta, gregexpr("\"id", meta)[[1]][1]-1, nchar(meta))
   fromJSON(meta)
+}
+
+checkCredentials <- function(ts_URI, key="sos2-tamis", secOpts=.opts) {
+  if(any(strsplit(ts_URI, "/")[[1]] == key))
+    return(.opts)
+  else
+    return(NULL)
 }
 
 ###
@@ -106,7 +113,7 @@ timeseries <- timeseries[nchar(timeseries) > 0]
 
 dataObs_STFDF <- NULL
 for (ts in timeseries) { # ts <- timeseries[1]
-  source <- readTSdata(ts, timespan, .opts)
+  source <- readTSdata(ts, timespan, checkCredentials(ts))
   if(is.null(dataObs_STFDF)) {
     dataObs_STFDF <- source
     next;
@@ -325,5 +332,3 @@ if(isGrid) {
   close.nc(nc)
 }
 # wps.out: ncFile, netcdf;
-
-cat(Sys.time(), "\n")

@@ -10,11 +10,11 @@
 
 # wps.in: timeseriesZielvariable, string, TS URI, 
 # abstract = timeseries Id for the target variable,
-# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451";
+# value = "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/592";
 
 # wps.in: timespan, string, timespan of reference period, 
 # abstract = timeseries Id for the target variable,
-# value = "2016-01-01T/2016-02-29TZ";
+# value = "2017-04-29T11:23:45.674Z/2017-05-29T11:23:45.674Z";
 
 # wps.in: singleInputNiederschlag, double, single value, 
 # abstract = single value for prediction values: Niederschlag,
@@ -26,7 +26,7 @@
 
 # wps.in: singleInputZeitstempel, string, prediction time stamp, 
 # abstract = single timestamp for which the prediction shall be made,
-# value = "2016-03-03T14:00:00Z";
+# value = "2017-05-29T23:23:45Z";
 
 #################################
 
@@ -34,13 +34,13 @@
 timeseriesNiederschlag <- "http://www.fluggs.de/sos2/api/v1/timeseries/427"
 timeseriesFuellstand <- "http://www.fluggs.de/sos2/api/v1/timeseries/26"
 
-timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451"
+timeseriesZielvariable <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/592"
 
-timespan <- "2016-01-01T/2016-02-29TZ"
+timespan <- "2017-04-29T11:23:45.674Z/2017-05-29T11:23:45.674Z"
 
-singleInputNiederschlag <- 100
-singleInputFuellstand <- 290
-singleInputZeitstempel <- "2016-03-03T14:00:00Z"
+singleInputNiederschlag <- 0
+singleInputFuellstand <- 294.83
+singleInputZeitstempel <- "2017-05-29T23:23:45Z"
 #wps.on;
 
 # wps.import: tamis-regression-common.R;
@@ -71,19 +71,25 @@ if (is.na(singleInputZeitstempelSeconds)){
 }else{
   singleInputZeitstempel <- singleInputZeitstempelSeconds
 }
+
+timespanZeitstempelSeconds <- as.POSIXct(strsplit(timespan,"/")[[1]][2], format="%Y-%m-%dT%H:%M:%SZ")
+if (is.na(timespanZeitstempelSeconds)){
+  timespanZeitstempel <- as.POSIXct(strsplit(timespan,"/")[[1]][2], format="%Y-%m-%dT%H:%M:%OSZ")
+}else{
+  timespanZeitstempel <- timespanZeitstempelSeconds
+}
+
 diffHours <- ceiling((as.numeric(singleInputZeitstempel) - as.numeric(lstTSDf$time))/3600)
-diffFillLevel <- singleInputFuellstand - lstTSDf$fillLevel
+diffFillLevelPerHour <- (singleInputFuellstand - lstTSDf$fillLevel)/diffHours
 
-dissAggFun <- function(x) ifelse(x < 1/3, 6*x, 3 - 3*x)
+diffHoursReq <- ceiling((as.numeric(singleInputZeitstempel) - as.numeric(timespanZeitstempel))/3600)
 
-reSum <- sum(dissAggFun(0:diffHours/diffHours)*singleInputNiederschlag/diffHours)
-
-predDf <- data.frame(time=singleInputZeitstempel - diffHours:0*3600)
-predDf$precip <- dissAggFun(0:diffHours/diffHours)*singleInputNiederschlag/diffHours*singleInputNiederschlag/reSum 
-predDf$fillLevel <- lstTSDf$fillLevel + 0:diffHours*diffFillLevel/diffHours
+predDf <- data.frame(time=singleInputZeitstempel - (diffHoursReq-1):0 * 3600)
+predDf$precip <- rep(singleInputNiederschlag/diffHoursReq, length(diffHoursReq))
+predDf$fillLevel <- singleInputFuellstand - (diffHoursReq - 1):0 * diffFillLevelPerHour
 
 predDf$predVar <- predict(lmMod, predDf)
-
+targetVar[1,]
 modelPrediction <- "modelPrediction.csv"
 write.csv(predDf, file = modelPrediction)
 

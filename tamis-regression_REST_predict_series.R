@@ -66,13 +66,13 @@ timespanPredict <- "2016-03-01T/2016-03-31TZ"
 #wps.on;
 
 
-precip <- readTSdata(timeseriesNiederschlag, timespanPredict)
-fillLevel <- readTSdata(timeseriesFuellstand, timespanPredict)
-targetVar <- readTSdata(timeseriesZielvariable, timespanPredict, .opts)
+precip <- readTSdata(timeseriesNiederschlag, timespanPredict, checkCredentials(timeseriesNiederschlag))
+fillLevel <- readTSdata(timeseriesFuellstand, timespanPredict, checkCredentials(timeseriesFuellstand))
+targetVar <- readTSdata(timeseriesZielvariable, timespanPredict, checkCredentials(timeseriesZielvariable))
 
-precipMeta <- readTSmeta(timeseriesNiederschlag)
-fillLevelMeta <- readTSmeta(timeseriesFuellstand)
-targetVarMeta <- readTSmeta(timeseriesZielvariable, .opts)
+precipMeta <- readTSmeta(timeseriesNiederschlag, checkCredentials(timeseriesNiederschlag))
+fillLevelMeta <- readTSmeta(timeseriesFuellstand, checkCredentials(timeseriesFuellstand))
+targetVarMeta <- readTSmeta(timeseriesZielvariable, checkCredentials(timeseriesZielvariable))
 # synchronise data sets
 
 #precipitation
