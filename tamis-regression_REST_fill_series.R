@@ -112,8 +112,8 @@ as.numeric(Sys.Date())
 
 debugonce(readTSdata)
 
-precipMeta <- readTSmeta(timeseriesNiederschlag)
-fillLevelMeta <- readTSmeta(timeseriesFuellstand)
+precipMeta <- readTSmeta(timeseriesNiederschlag, .opts)
+fillLevelMeta <- readTSmeta(timeseriesFuellstand, .opts)
 targetVarMeta <- readTSmeta(timeseriesZielvariable, .opts)
 
 # synchronise data sets
