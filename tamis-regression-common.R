@@ -61,8 +61,6 @@ checkCredentials <- function(ts_URI, key="sos2-tamis", secOpts=.opts) {
 
 source("~/52North/secOpts.R")
 
-source("~/52North/secOpts.R")
-
 precip <- readTSdata(timeseriesNiederschlag, timespan, checkCredentials(timeseriesNiederschlag))
 fillLevel <- readTSdata(timeseriesFuellstand, timespan,checkCredentials(timeseriesFuellstand))
 targetVar <- readTSdata(timeseriesZielvariable, timespan, checkCredentials(timeseriesZielvariable))

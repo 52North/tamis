@@ -87,8 +87,10 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 
-timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455"
-timespan <-  "2016-01-01T/2016-09-30TZ"
+timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/592 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/593 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/594 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/595 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/584 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/585 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/586 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/587 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/588 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/589 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/590 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/596 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/597 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/578 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/579 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/580 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/581 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/582 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/583 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/577 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/591 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/575 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/576"
+  # "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482" # "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455"
+timespan <-  "2017-01-31T09:26:42.339Z/2017-07-31T08:26:42.339Z"
+# "2016-12-28T12:10:15.944Z/2017-06-28T11:10:15.944Z"
 target <- "geotiff.tiff" 
 
 # wps.on;
@@ -121,8 +123,6 @@ for (ts in timeseries) { # ts <- timeseries[1]
   dataObs_STFDF <- rbind(dataObs_STFDF, source)
 }
 
-colnames(dataObs_STFDF@data) <- "Schuettmenge"
-
 # updateStatus("Setting CRS")
 
 dataObs_STFDF@sp@proj4string <- CRS("+init=epsg:4326")
@@ -144,7 +144,10 @@ graphics.off()
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 colnames(dataObs_STFDF@sp@coords) <- c("x","y")
 
-empVgm <- variogram(Schuettmenge ~ 1, dataObs_STFDF, tlags=0)
+colnamesOld <- colnames(dataObs_STFDF@data)
+colnames(dataObs_STFDF@data) <- "targetVar"
+
+empVgm <- variogram(targetVar ~ 1, dataObs_STFDF, tlags=0)
 empVgm <- empVgm[-1,]
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
@@ -172,13 +175,13 @@ targetVar <- NULL
 
 if (n.time >= 10) {
   for (day in 1:n.time) {
-    pred <- krige0(Schuettmenge ~ 1, dataObs_STFDF[,day], target, model=fitVgm, computeVar = T)
+    pred <- krige0(targetVar ~ 1, dataObs_STFDF[,day], target, model=fitVgm, computeVar = T)
     targetData <- cbind(targetData, pred$pred)
     targetVar <- cbind(targetVar, pred$var)
   }
 } else {
   for (day in 1:n.time) {
-    pred <- idw0(Schuettmenge ~ 1, dataObs_STFDF[,day], target)
+    pred <- idw0(targetVar ~ 1, dataObs_STFDF[,day], target)
     targetData <- cbind(targetData, pred)
     targetVar <- cbind(targetVar, rep(NA, length(pred)))
   }
