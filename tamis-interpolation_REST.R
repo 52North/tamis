@@ -173,7 +173,7 @@ graphics.off()
 targetData <- NULL
 targetVar <- NULL
 
-if (n.time >= 10) {
+if (n.time >= 10 & !attributes(fitVgm)$singular) {
   for (day in 1:n.time) {
     pred <- krige0(targetVar ~ 1, dataObs_STFDF[,day], target, model=fitVgm, computeVar = T)
     targetData <- cbind(targetData, pred$pred)

@@ -86,8 +86,9 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 
-timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482"
-timespan <-  "2016-08-06T13:44:33.471Z/2017-02-06T14:44:33.471Z"
+timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/592 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/593 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/594 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/595 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/584 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/585 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/586 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/587 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/588 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/589 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/590 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/596 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/597 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/578 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/579 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/580 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/581 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/582 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/583 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/577 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/591 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/575 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/576" 
+# "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482"
+timespan <-  "2017-01-31T09:26:42.339Z/2017-07-31T08:26:42.339Z"
 target <- "geotiff.tiff" 
 
 # wps.on;
@@ -110,78 +111,15 @@ timeseries <- timeseries[nchar(timeseries) > 0]
 
 # updateStatus("loading TS data")
 
-heightCorrection <- TRUE
-
 dataObs_STFDF <- NULL
-for (ts in timeseries) { # ts <- timeseries[3]
-  source <- as(readTSdata(ts, timespan, checkCredentials(ts)), "data.frame")
-  tsId <- tail(strsplit(ts, "/")[[1]],1)
-  if (heightCorrection)
-    source$Wasserstand.im.Damm <- switch(tsId,
-                                         "513"=297.46, # MQA1: 
-                                         "514"=298.32, # MQA3: 
-                                         "515"=287.07, # MQA4: 
-                                         "516"=286.75, # MQA5: 
-                                         "470"=275.67, # MQA7: 
-                                         "472"=296.71, # MQB1: 
-                                         "473"=298.43, # MQB2: 
-                                         "474"=287.11, # MQB4: 
-                                         "475"=287.21, # MQB5: 
-                                         "476"=275.96, # MQB6:
-                                         "477"=276.01, # MQB7: 
-                                         "478"=296.26, # MQC1: 
-                                         "479"=298.36, # MQC2: 
-                                         "480"=287.07, # MQC4: 
-                                         "481"=287.06, # MQC5: 
-                                         "482"=275.96, # MQC6
-                                         "483"=275.99) - source$Wasserstand.im.Damm # MQC7
-  source$distanceToDam <- switch(tsId,
-                                 "513"=-2.66, # MQA1: 
-                                 "514"=7.17,  # MQA3: 
-                                 "515"=28.47, # MQA4: 
-                                 "516"=28.47, # MQA5: 
-                                 "470"=52.74, # MQA7: 
-                                 "472"=-5.04, # MQB1: 
-                                 "473"=7.10,  # MQB2: 
-                                 "474"=28.41, # MQB4: 
-                                 "475"=28.10, # MQB5: 
-                                 "476"=51.90, # MQB6:
-                                 "477"=51.96, # MQB7: 
-                                 "478"=-5.17, # MQC1: 
-                                 "479"=6.98,  # MQC2: 
-                                 "480"=28.39, # MQC4: 
-                                 "481"=28.48, # MQC5: 
-                                 "482"=52.36, # MQC6
-                                 "483"=52.19) # MQC7
-                                       
-  
+for (ts in timeseries) { # ts <- timeseries[1]
+  source <- readTSdata(ts, timespan, checkCredentials(ts))
+  if(is.null(dataObs_STFDF)) {
+    dataObs_STFDF <- source
+    next;
+  }
   dataObs_STFDF <- rbind(dataObs_STFDF, source)
 }
-
-dataObs_STFDF <- stConstruct(dataObs_STFDF[,c(1:2,4,7:8)], space = c("coords.x1", "coords.x2"), time = "time")
-dataObs_STFDF <- as(dataObs_STFDF, "STFDF")
-colnames(dataObs_STFDF@data) <- c("Wasserstand","distanceToDam")
-
-tsIds <- sapply(timeseries, function(x) tail(strsplit(x, "/")[[1]],1))
-tsNames <- sapply(tsIds, function(x) switch(x,
-                  "513"="MQA1",
-                  "514"="MQA3",
-                  "515"="MQA4",
-                  "516"="MQA5",
-                  "470"="MQA7",
-                  "472"="MQB1",
-                  "473"="MQB2",
-                  "474"="MQB4",
-                  "475"="MQB5",
-                  "476"="MQB6",
-                  "477"="MQB7",
-                  "478"="MQC1",
-                  "479"="MQC2",
-                  "480"="MQC4",
-                  "481"="MQC5",
-                  "482"="MQC6",
-                  "483"="MQC7"))
-rownames(dataObs_STFDF@sp@coords) <- tsNames
 
 # updateStatus("Setting CRS")
 
@@ -198,23 +136,20 @@ tmpDataPos <- stplot(dataObs_STFDF[,1:min(12, n.time)])
 print(tmpDataPos)
 graphics.off()
 
-# wps.out: dataPos, png;
 
-# dataTS <- "dataTS.png"
-# png(file = dataTS)
-# tmpDataTS <- stplot(dataObs_STFDF[,, "Wasserstand", drop=F], mode="ts")
-# print(tmpDataTS)
-# graphics.off()
+# wps.out: dataPos, png;
 
 # updateStatus("Calculate empirical variogram")
 
 dataObs_STFDF@sp <- spTransform(dataObs_STFDF@sp, target@proj4string)
 colnames(dataObs_STFDF@sp@coords) <- c("x","y")
 
+colnamesOld <- colnames(dataObs_STFDF@data)
+colnames(dataObs_STFDF@data) <- "targetVar"
+
 dataObs_STSDF <- as(dataObs_STFDF, "STSDF")
 
-linMod <- lm(Wasserstand ~ x+y, as(dataObs_STSDF[,,drop=F], "data.frame"), na.action = na.omit)
-summary(linMod)
+linMod <- lm(targetVar ~ x+y, as(dataObs_STSDF[,,drop=F], "data.frame"), na.action = na.omit)
 
 dataObs_STSDF@data$resid <- linMod$residuals
 
@@ -222,11 +157,10 @@ empVgm <- variogram(resid ~ 1, dataObs_STSDF, tlags=0, na.omit = TRUE)
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
 
-fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma)*0.5, 
+fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma)*0.75, 
                                     "Lin", 
-                                    mean(empVgm$dist, na.rm = T),
-                                    median(empVgm$gamma)*0.5))
-
+                                    2*mean(empVgm$dist, na.rm = T),
+                                    median(empVgm$gamma)*0.25))
 
 # updateStatus("Theoretical variogram has been fitted.")
 
@@ -245,18 +179,17 @@ graphics.off()
 targetData <- NULL
 targetVar <- NULL
 
-
-if (n.time >= 10) {
+if (n.time >= 10 & !attributes(fitVgm)$singular) {
   for (day in 1:n.time) { # day <- 1
-    pred <- krige(resid ~ 1, dataObs_STSDF[,day], target, model=fitVgm)@data
-    targetData <- cbind(targetData, pred$var1.pred)
-    targetVar <- cbind(targetVar, pred$var1.var)
+    pred <- krige0(resid ~ 1, dataObs_STSDF[,day], target, model=fitVgm, computeVar = T)
+    targetData <- cbind(targetData, pred$pred)
+    targetVar <- cbind(targetVar, pred$var)
   }
 } else {
    for (day in 1:n.time) { # day <- 1
-     pred <- krige(resid ~ 1, dataObs_STSDF[,day], target)@data
-     targetData <- cbind(targetData, pred$var1.pred)
-     targetVar <- cbind(targetVar, pred$var1.var)
+     pred <- idw0(targetVar ~ 1, dataObs_STSDF[,day], target)
+     targetData <- cbind(targetData, pred)
+     targetVar <- cbind(targetVar, rep(NA, length(pred)))
    }
 }
 
@@ -270,7 +203,7 @@ for (i in 1:((ncol(target@data)-1)/2)) { # i <- 1
   target@data[,i] <- linModPred + target@data[,i]
 }
 
-# updateStatus("Interpolation of residuls has been performed.")
+# updateStatus("Interpolation of residuals has been performed.")
 
 if(isGrid) {
   predictions <- "predictions.tiff"
