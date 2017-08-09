@@ -318,7 +318,7 @@ if(isGrid) {
   att.put.nc(nc, "crs", "EPSG_code", "NC_CHAR", paste("EPSG", epsgNum, sep=":"))
   att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", target_STFDF@sp@proj4string@projargs)
   
-  obsProp <- colnames(dataObs_STFDF@data)[1]
+  obsProp <- colnamesOld
   
   var.def.nc(nc, obsProp, "NC_DOUBLE", NA)
   att.put.nc(nc, obsProp, "ancillary_variables", "NC_CHAR", "var1pred var1var")
