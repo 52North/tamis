@@ -8,8 +8,8 @@
 # abstract = phenomenon of interest,
 # value = "Lufttemperatur";
 
-# wps.in: timestamp, type = string,
-# abstract = timestamp for the interpolation variable,
+# wps.in: timespan, type = string,
+# abstract = timespan for the interpolation variable,
 # value = "2017-01-01T12:00:00Z";
 
 # wps.in: gridColumns, type = integer,
