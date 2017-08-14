@@ -10,7 +10,7 @@
 
 # wps.in: timespan, type = string,
 # abstract = timespan for the interpolation variable,
-# value = "2017-01-01T12:00:00Z";
+# value = "2013-01-01T00:00:01Z/2013-01-31T23:59:59Z";
 
 # wps.in: gridColumns, type = integer,
 # abstract = number of columns in the grid,
