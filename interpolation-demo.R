@@ -37,7 +37,7 @@ library(sensorweb4R)
 # define defaults for local testing
 endpoint <- "http://fluggs.wupperverband.de/sos2/api/v1"
 phenomenon <- "Lufttemperatur"
-timespan <- "2012-07-01T00:00:01Z/2012-07-31T23:59:59Z"
+timespan <- "2013-01-01T00:00:01Z/2013-01-31T23:59:59Z"
 gridColumns <- 10
 gridRows <- 5
 # wps.on;
@@ -95,7 +95,7 @@ summary(lm(value~x+timeIndex, dfFull))
 
 library(gstat)
 # empirical spatio-temporal variogram
-empVgm <- variogram(value~1, aggStfdf, tlags=0)
+empVgm <- variogram(value~x+y, aggStfdf, tlags=0)
 
 # make spatio-temporal variogram pure spatial = "pooled" variogram over all time slices
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
@@ -107,7 +107,7 @@ empVgm <- empVgm[empVgm$np>39,]
 
 qPar <- quantile(empVgm$gamma, probs = c(0.9,0.05))
 
-fitVgm <- fit.variogram(empVgm, vgm(qPar[1], "Exp", quantile(empVgm$dist, probs = 0.7), qPar[2]))
+fitVgm <- fit.variogram(empVgm, vgm(qPar[1], "Lin", quantile(empVgm$dist, probs = 0.7), qPar[2]))
 # plot(empVgm, fitVgm)
 
 cSize <- apply(aggStfdf@sp@bbox,1,diff)/c(gridColumns-1, gridRows-1)
@@ -128,12 +128,12 @@ aggStsdf <- as(aggStfdf, "STSDF")
 if (any(fitVgm$psill < 0) | attributes(fitVgm)$singular) {
   for (t in aggStfdf@time) {
     res <- rbind(res, 
-                 idw(value~1, aggStsdf[,t], tarGeom)@data)
+                 idw(value~x+y, aggStsdf[,t], tarGeom)@data)
   }
 } else {
   for (t in aggStfdf@time) {
     res <- rbind(res, 
-                 krige(value~1, aggStsdf[,t], tarGeom, model=fitVgm)@data)
+                 krige(value~x+y, aggStsdf[,t], tarGeom, model=fitVgm)@data)
   }
 }
 
