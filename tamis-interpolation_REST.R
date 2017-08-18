@@ -87,9 +87,9 @@ source("~/52North/secOpts.R")
 
 # wps.off;
 
-timeseries <- "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/592 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/593 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/594 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/595 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/584 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/585 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/586 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/587 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/588 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/589 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/590 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/596 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/597 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/578 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/579 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/580 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/581 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/582 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/583 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/577 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/591 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/575 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/576"
-  # "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/514 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/515 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/470 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/473 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/474 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/476 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/479 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/482" # "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455"
-timespan <-  "2017-01-31T09:26:42.339Z/2017-07-31T08:26:42.339Z"
+# "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/592 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/593 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/594 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/595 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/584 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/585 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/586 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/587 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/588 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/589 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/590 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/596 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/597 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/578 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/579 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/580 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/581 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/582 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/583 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/577 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/591 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/575 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/576"
+timeseries <-  "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455"
+timespan <-  "2017-02-15T00:00:01Z/2017-03-31T23:59:59Z"
 # "2016-12-28T12:10:15.944Z/2017-06-28T11:10:15.944Z"
 target <- "geotiff.tiff" 
 
@@ -133,7 +133,7 @@ n.time <- length(dataObs_STFDF@time)
 
 dataPos <- "dataPos.png"
 png(file = dataPos)
-tmpDataPos <- stplot(dataObs_STFDF[,1:min(6, n.time)])
+tmpDataPos <- stplot(dataObs_STFDF[,1:min(12, n.time)])
 print(tmpDataPos)
 graphics.off()
 
@@ -154,13 +154,21 @@ class(empVgm) <- c("gstatVariogram","data.frame")
 
 empVgm <- empVgm[empVgm$np>0,]
 
+useKriging <- n.time >= 10
+
 if(n.time >= 10) {
-  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 50))
-  tmpPlot <- plot(empVgm, fitVgm)
+  fitVgm <- tryCatch(fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 0.05)), 
+                     finally = useKriging <-- FALSE)
+  if (any(fitVgm[,-1] < 0) | attributes(fitVgm)$singular) {
+    useKriging <- FALSE
+    tmpPlot <- plot(empVgm)
+  } else {
+    tmpPlot <- plot(empVgm, fitVgm)
+  }
 } else {
   tmpPlot <- plot(empVgm)
 }
-  
+
 # wps output
 vgmFit <- "vgmFit.png"
 png(file = vgmFit)
@@ -173,7 +181,7 @@ graphics.off()
 targetData <- NULL
 targetVar <- NULL
 
-if (n.time >= 10 & !attributes(fitVgm)$singular) {
+if (useKriging) {
   for (day in 1:n.time) {
     pred <- krige0(targetVar ~ 1, dataObs_STFDF[,day], target, model=fitVgm, computeVar = T)
     targetData <- cbind(targetData, pred$pred)
@@ -198,6 +206,7 @@ if(isGrid) {
   predVar <- "predVar.tiff"
 } else { 
   predictions <- "predictions.csv"
+  predVar <- "predVar.csv"
 }
 
 if (isGrid) {
@@ -232,7 +241,7 @@ if(isGrid) {
   # wps output
   predMap <- "predMap.png"
   png(file = predMap)
-  tmpPlot <- stplot(target_STFDF[,sort(sample(n.time, min(n.time,12)))],
+  tmpPlot <- stplot(target_STFDF[,sort(sample(n.time, min(n.time,16)))],
                     sp.layout=list("sp.points", dataObs_STFDF@sp))
   print(tmpPlot)
   graphics.off()
@@ -307,25 +316,48 @@ if(isGrid) {
   att.put.nc(nc, "crs", "proj4_params", "NC_CHAR", target_STFDF@sp@proj4string@projargs)
   
   obsProp <- colnamesOld
+  obsProp <- paste(strsplit(obsProp, " ")[[1]], collapse="_")
   
-  var.def.nc(nc, obsProp, "NC_DOUBLE", NA)
-  att.put.nc(nc, obsProp, "ancillary_variables", "NC_CHAR", "var1pred var1var")
-  att.put.nc(nc, obsProp, "ref", "NC_CHAR", "http://www.uncertml.org/distributions/normal")
-  att.put.nc(nc, obsProp, "shape", "NC_CHAR", "x y t")
-  
-  UncertML <- list(var1.pred = "http://www.uncertml.org/distributions/normal#mean",
-                   var1.var = "http://www.uncertml.org/distributions/normal#variance")
-  
-  for (var.name in colnames(target_STFDF@data)) {
-    varname <- gsub(".","", var.name, fixed=TRUE)
-    var.def.nc(nc, varname, "NC_DOUBLE", dimensions = c(2,1,0))
+  if (useKriging) { # use normal distribution
+    var.def.nc(nc, obsProp, "NC_DOUBLE", NA)
+    att.put.nc(nc, obsProp, "ancillary_variables", "NC_CHAR", "var1pred var1var")
+    att.put.nc(nc, obsProp, "ref", "NC_CHAR", "http://www.uncertml.org/distributions/normal")
+    att.put.nc(nc, obsProp, "shape", "NC_CHAR", "x y t")
+    
+    UncertML <- list(var1.pred = "http://www.uncertml.org/distributions/normal#mean",
+                     var1.var = "http://www.uncertml.org/distributions/normal#variance")
+    
+    for (var.name in colnames(target_STFDF@data)) {
+      varname <- gsub(".","", var.name, fixed=TRUE)
+      var.def.nc(nc, varname, "NC_DOUBLE", dimensions = c(2,1,0))
+      att.put.nc(nc, varname, "missing_value", "NC_DOUBLE", -99999.9)
+      att.put.nc(nc, varname, "ref", "NC_CHAR", UncertML[[var.name]])
+      att.put.nc(nc, varname, "grid_mapping", "NC_CHAR", "crs")
+      dArray <- array(target_STFDF@data[[var.name]], c(target_STFDF@sp@grid@cells.dim[1],
+                                                       target_STFDF@sp@grid@cells.dim[2],
+                                                       length(target_STFDF@time)))
+      dArray <- aperm(dArray, c(3,2,1))
+      var.put.nc(nc, varname, dArray, na.mode = 0)
+    }
+  } else { # use single realisation
+    dim.def.nc(nc, "realisation", 4)
+    var.def.nc(nc, "realisation", "NC_DOUBLE", "realisation")
+    var.put.nc(nc, "realisation", 1)
+    
+    att.put.nc(nc, "realisation", "axis", "NC_CHAR", "realisation")
+    att.put.nc(nc, "realisation", "long_name", "NC_CHAR", "realisation")
+    att.put.nc(nc, "realisation", "standard_name", "NC_CHAR", "realisation")
+    att.put.nc(nc, "realisation", "ref", "NC_CHAR", "http://www.uncertml.org/samples/realisation")
+    
+    varname <- obsProp
+    var.def.nc(nc, varname, "NC_DOUBLE", dimensions = c(3,2,1,0))
     att.put.nc(nc, varname, "missing_value", "NC_DOUBLE", -99999.9)
-    att.put.nc(nc, varname, "ref", "NC_CHAR", UncertML[[var.name]])
+    att.put.nc(nc, varname, "ref", "NC_CHAR", "http://www.uncertml.org/samples/random")
     att.put.nc(nc, varname, "grid_mapping", "NC_CHAR", "crs")
-    dArray <- array(target_STFDF@data[[var.name]], c(target_STFDF@sp@grid@cells.dim[1],
+    dArray <- array(target_STFDF@data[["var1.pred"]], c(target_STFDF@sp@grid@cells.dim[1],
                                                      target_STFDF@sp@grid@cells.dim[2],
-                                                     length(target_STFDF@time)))
-    dArray <- aperm(dArray, c(3,2,1))
+                                                     length(target_STFDF@time), 1))
+    dArray <- aperm(dArray, c(4,3,2,1))
     var.put.nc(nc, varname, dArray, na.mode = 0)
   }
   
