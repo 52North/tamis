@@ -154,9 +154,9 @@ class(empVgm) <- c("gstatVariogram","data.frame")
 
 empVgm <- empVgm[empVgm$np>0,]
 
-useKriging <- n.time >= 10
+useKriging <- TRUE # n.time >= 10
 
-if(n.time >= 10) {
+if(useKriging) {
   fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 0.05))
   if (any(fitVgm[,-1] < 0) | attributes(fitVgm)$singular) {
     fitVgm <- vgm(median(empVgm$gamma), "Lin", 0.05)

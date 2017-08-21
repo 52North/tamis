@@ -157,10 +157,26 @@ empVgm <- variogram(resid ~ 1, dataObs_STSDF, tlags=0, na.omit = TRUE)
 empVgm <- cbind(empVgm, data.frame(dir.hor=rep(0,nrow(empVgm)), dir.ver=rep(0,nrow(empVgm))))
 class(empVgm) <- c("gstatVariogram","data.frame")
 
-fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma)*0.75, 
-                                    "Lin", 
-                                    2*mean(empVgm$dist, na.rm = T),
-                                    median(empVgm$gamma)*0.25))
+
+useKriging <- TRUE # n.time >= 10
+
+if(useKriging) {
+  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma)*0.75, 
+                                      "Lin", 
+                                      2*mean(empVgm$dist, na.rm = T),
+                                      median(empVgm$gamma)*0.25))
+  if (any(fitVgm[,-1] < 0) | attributes(fitVgm)$singular) {
+    fitVgm <- vgm(median(empVgm$gamma)*0.75, 
+                  "Lin", 
+                  2*mean(empVgm$dist, na.rm = T),
+                  median(empVgm$gamma)*0.25)
+    # useKriging <- FALSE
+  } 
+  tmpPlot <- plot(empVgm, fitVgm)
+} else {
+  tmpPlot <- plot(empVgm)
+}
+
 
 # updateStatus("Theoretical variogram has been fitted.")
 
@@ -179,7 +195,7 @@ graphics.off()
 targetData <- NULL
 targetVar <- NULL
 
-if (n.time >= 10 & !attributes(fitVgm)$singular) {
+if (useKriging) {
   for (day in 1:n.time) { # day <- 1
     pred <- krige0(resid ~ 1, dataObs_STSDF[,day], target, model=fitVgm, computeVar = T)
     targetData <- cbind(targetData, pred$pred)
