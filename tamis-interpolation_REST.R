@@ -89,7 +89,7 @@ source("~/52North/secOpts.R")
 
 # "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/592 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/593 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/594 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/595 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/584 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/585 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/586 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/587 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/588 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/589 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/590 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/596 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/597 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/578 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/579 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/580 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/581 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/582 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/583 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/577 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/591 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/575 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/576"
 timeseries <-  "http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/450 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/451 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/452 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/453 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/454 http://fluggs.wupperverband.de/sos2-tamis/api/v1/timeseries/455"
-timespan <-  "2017-02-15T00:00:01Z/2017-03-31T23:59:59Z"
+timespan <-  "2017-01-01T00:00:01Z/2017-07-31T23:59:59Z"
 # "2016-12-28T12:10:15.944Z/2017-06-28T11:10:15.944Z"
 target <- "geotiff.tiff" 
 
@@ -157,14 +157,12 @@ empVgm <- empVgm[empVgm$np>0,]
 useKriging <- n.time >= 10
 
 if(n.time >= 10) {
-  fitVgm <- tryCatch(fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 0.05)), 
-                     finally = useKriging <-- FALSE)
+  fitVgm <- fit.variogram(empVgm, vgm(median(empVgm$gamma), "Lin", 0.05))
   if (any(fitVgm[,-1] < 0) | attributes(fitVgm)$singular) {
-    useKriging <- FALSE
-    tmpPlot <- plot(empVgm)
-  } else {
-    tmpPlot <- plot(empVgm, fitVgm)
-  }
+    fitVgm <- vgm(median(empVgm$gamma), "Lin", 0.05)
+    # useKriging <- FALSE
+  } 
+  tmpPlot <- plot(empVgm, fitVgm)
 } else {
   tmpPlot <- plot(empVgm)
 }
