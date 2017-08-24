@@ -14,20 +14,20 @@
 
 # wps.in: gridColumns, type = integer,
 # abstract = number of columns in the grid,
-# value = 10;
+# value = 20;
 
 # wps.in: gridRows, type = integer,
 # abstract = number of rows in the grid,
-# value = 5;
+# value = 10;
 
-# updateStatus("Loading libraries")
+# updateStatus("Loading libraries");
 
 library(sp)
 library(spacetime)
 library(rgdal)
 library(sensorweb4R)
 
-# updateStatus("Set-up REST-API")
+# updateStatus("Set-up REST-API");
 
 
 ## pre-process 
@@ -42,7 +42,7 @@ gridColumns <- 10
 gridRows <- 5
 # wps.on;
 
-# define endpoint
+# updateStatus("define endpoint");
 endpoint <- as.Endpoint(endpoint)
 
 # fetch meta-data
@@ -56,7 +56,7 @@ if(length(tsIds) == 0)
 
 tsSelected <- tsMetaData[tsIds]
 
-# get data
+# updateStatus("get data");
 tsData <- getData(tsSelected, timespan = timespan)
 
 df <- do.call(rbind, lapply(tsData, as.data.frame))
@@ -84,6 +84,8 @@ stfdf <- as(stsdf,"STFDF")
 
 # stplot(stfdf, mode="ts")
 
+# updateStatus("aggregate data");
+
 aggStfdf <- aggregate(stsdf, by="day", FUN=function(x) mean(x, na.rm=T))
 
 # stplot(aggStfdf, mode="ts")
@@ -94,7 +96,7 @@ dfFull$timeIndex <- as.factor(dfFull$timeIndex)
 summary(lm(value~x+timeIndex, dfFull))
 
 library(gstat)
-# empirical spatio-temporal variogram
+# updateStatus("calculate empirical pooled spatio-temporal variogram");
 empVgm <- variogram(value~x+y, aggStfdf, tlags=0)
 
 # make spatio-temporal variogram pure spatial = "pooled" variogram over all time slices
@@ -106,6 +108,8 @@ empVgm <- empVgm[empVgm$np>39,]
 # stplot(aggStfdf)
 
 qPar <- quantile(empVgm$gamma, probs = c(0.9,0.05))
+
+# updateStatus("fit spatial variogram");
 
 fitVgm <- fit.variogram(empVgm, vgm(qPar[1], "Lin", quantile(empVgm$dist, probs = 0.7), qPar[2]))
 # plot(empVgm, fitVgm)
@@ -125,6 +129,8 @@ res <- NULL
 
 aggStsdf <- as(aggStfdf, "STSDF")
 
+# updateStatus("interpolate grid");
+
 if (any(fitVgm$psill < 0) | attributes(fitVgm)$singular) {
   for (t in aggStfdf@time) {
     res <- rbind(res, 
@@ -140,6 +146,8 @@ if (any(fitVgm$psill < 0) | attributes(fitVgm)$singular) {
 resStfdf <- STFDF(tarGeom, aggStfdf@time, res)
 
 # stplot(resStfdf)
+
+# updateStatus("produce output");
 
 # wps output
 predMap <- "predMap.png"
